@@ -73,15 +73,41 @@
       "last_failed": null
     },
     "tema8_small__1_.md": {
-      "completed": [],
+      "completed": [
+        "8.1"
+      ],
       "last_failed": null,
-      "info": {}
+      "info": {
+        "8.1": {
+          "attempts": 1,
+          "secs": 427.7,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": true,
+          "at": "2026-10-11T22:31:33"
+        }
+      }
     }
   },
   "queue": [
     {
       "id": "730e0861",
       "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema8_small__1_.md",
+      "from_step": "",
+      "to": "",
+      "only": "",
+      "include_skipped": false
+    },
+    {
+      "id": "5fe74fff",
+      "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema9.md",
+      "from_step": "",
+      "to": "",
+      "only": "",
+      "include_skipped": false
+    },
+    {
+      "id": "c07e8d80",
+      "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema10.md",
       "from_step": "",
       "to": "",
       "only": "",
