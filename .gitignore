@@ -7,4 +7,3 @@ bin/
 .aider*
 check-output/
 all-results/
-.orchestrator/
