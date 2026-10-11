@@ -11,12 +11,7 @@
     "8.9",
     "8.10"
   ],
-  "last_failed": {
-    "step": "8.11",
-    "check": "go vet ./...",
-    "model": "ollama_chat/gemma4-e4b",
-    "at": "2026-10-11T15:10:33"
-  },
+  "last_failed": null,
   "spec": "tema8_small.md",
   "model": "ollama_chat/gpt-oss:20b"
 }
