@@ -1,0 +1,34 @@
+{
+  "spec": "tema8_small__1_.md",
+  "model": "ollama_chat/gemma4:26b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": [
+    {
+      "step": "8.1",
+      "title": "docker-compose.yml для PostgreSQL",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 427.7,
+      "aider_secs": 425.7,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "8.2",
+      "title": ".env.example",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 112.4,
+      "aider_secs": 110.5,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
+    }
+  ]
+}

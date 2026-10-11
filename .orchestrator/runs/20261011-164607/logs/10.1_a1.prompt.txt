@@ -1,0 +1,71 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages, comments and identifiers must be in English). User-facing Ukrainian text lives ONLY in web/templates/*.html and web/messages.json.
+- Keep code simple and correct for Go 1.22+. Use only the standard library plus Gin and the dependencies already in go.mod. No new dependencies.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. The only new top-level Go package is web/ (embedded templates and static files).
+- Web handlers only parse forms, call existing services/repositories and render templates. Business rules stay in internal/service.
+- Templates use html/template only. Never use template.HTML, template.JS, template.URL or similar on user data. No inline <script>, inline event handlers (onclick=...) or style="..." attributes (the Content-Security-Policy forbids them). No JavaScript at all, no CDN links, no external fonts.
+- Every state-changing form is a POST with a hidden csrf_token field and ends with a redirect (303 See Other, Post/Redirect/Get).
+- Never log or render passwords, hashes, tokens or cookies.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 9 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-9`; `docker compose up -d` — БД healthy.
+- У `.env` постав `JWT_TTL_MINUTES=60` або більше: сесія в браузері живе стільки ж, скільки JWT (refresh-токени з 9.15–9.16 веб-шар не використовує).
+- Відкрий `SEED_DEMO_USERS=true` у `.env` — матимеш готових `admin`, `librarian@libratrack.local` і `reader@libratrack.local` для ручних перевірок.
+- Додавай в Aider (`/add`) файли, які крок змінює.
+- **Прийми UX-рішення (таблиця нижче) до кроку 10.6.**
+
+**UX-рішення студента (межа ШІ):** що бачить читач, а що бібліотекар, і де стоїть кнопка повернення — це продуктові рішення. Нижче — значення, закладені в промпти; зміни їх свідомо, до запуску відповідних кроків.
+
+| Питання | Рішення в промптах |
+|---|---|
+| Каталог для анонімів | закритий: потрібен вхід (так само, як API у темі 9) |
+| Що робить читач на сторінці книги | бачить кількість доступних примірників і підказку «звернись до бібліотекаря» (самообслуговування й резервування — стретч-фіча) |
+| Хто бачить таблицю примірників | лише бібліотекар і адмін |
+| Як видати книгу | форма на сторінці книги: вибір доступного примірника + email читача |
+| Де кнопка «Прийняти повернення» | у списку активних видач у панелі бібліотекаря |
+| Прострочення | червоний бейдж + поточний штраф за правилами `LoanPolicy` |
+| Розмір сторінки каталогу | 12 книг |
+| Мова інтерфейсу | українська (тексти в шаблонах і `web/messages.json`) |
+
+**Карта веб-маршрутів (перевір перед кроком 10.12):**
+
+| Група | Маршрути | Доступ |
+|---|---|---|
+| Публічні | `GET /` (редирект), `GET/POST /login`, `GET/POST /register`, `/static/*` | усі |
+| Автентифіковані | `GET /catalog`, `GET /books/:id`, `GET /my/loans`, `POST /logout` | reader, librarian, admin |
+| Бібліотекар | `GET /staff/books`, `GET /staff/new-book`, `POST /staff/books`, `GET+POST /staff/books/:id/edit`, `POST /staff/books/:id/copies`, `GET+POST /staff/authors`, `GET+POST /staff/categories`, `GET /staff/loans`, `POST /staff/loans`, `POST /staff/loans/:id/return`, `GET /staff/reports` | librarian, admin |
+| Адмін | `POST /staff/books/:id/delete`, `GET /admin/users`, `POST /admin/users/:id/role` | admin |
+
+`/health`, `/swagger/*` і `/api/v1/*` залишаються як у темі 9. Cookie **не** автентифікує API-запити: API приймає лише `Authorization: Bearer`.
+
+Task:
+Add the scaffolding for the server-rendered web UI. Create/modify these files:
+
+1. .env.example (modify): keep all existing variables and add
+   COOKIE_SECURE=false
+   with a comment line above it: set to true when the app is served over HTTPS. Also add a comment above JWT_TTL_MINUTES: the browser session lives as long as the JWT, use 60 or more for the web UI.
+
+2. web/embed.go (package web):
+   - //go:embed templates/*.html static messages.json  into  var FS embed.FS
+   - func Templates() (fs.FS, error) returning fs.Sub(FS, "templates")
+   - func Static() (fs.FS, error) returning fs.Sub(FS, "static")
+   - func Messages() ([]byte, error) returning the content of messages.json
+
+3. web/messages.json: one flat JSON object (UTF-8, short Ukrainian texts without HTML) with exactly these keys:
+   flash.logged_out, flash.registered, flash.book_created, flash.book_updated, flash.book_deleted, flash.author_created, flash.category_created, flash.copy_created, flash.loan_issued, flash.loan_returned, flash.role_updated,
+   error.invalid_credentials, error.email_taken, error.validation, error.not_found, error.forbidden, error.server, error.conflict, error.csrf, error.invalid_reference, error.copy_not_available, error.loan_limit_reached, error.already_returned, error.reader_not_found, error.self_role_change, error.delete_not_confirmed,
+   field.email, field.password, field.full_name, field.title, field.isbn, field.published_year, field.publisher, field.description, field.category_id, field.author_ids, field.name, field.bio, field.inventory_no, field.status, field.copy_id, field.user_id, field.role, field.unknown
+   Keys starting with "error." are shown as errors, keys starting with "flash." as success messages. Field texts are short labels (for example "Email", "Password").
+
+4. web/static/css/style.css: a minimal responsive stylesheet: system font stack, container with max-width 960px, top navigation bar, tables (wrapped by a .table-wrap with overflow-x: auto), forms (labels, inputs, selects, textarea, buttons), .flash and .flash-error, .badge, .badge-ok, .badge-warn, .badge-overdue, .pagination, .card, .muted. No external fonts, no CDN, no JavaScript, no frameworks.
+
+5. web/templates/layout.html: define the template "layout" (a complete HTML5 page, lang="uk", charset utf-8, viewport meta, <title>{{template "title" .}} - LibraTrack</title>, stylesheet link /static/css/style.css). The page data contract is:
+   .User (nil for anonymous, otherwise .User.ID, .User.Role, .User.IsStaff, .User.IsAdmin), .Flash (a message key or empty string), .FlashIsError (bool), .CSRFToken (string), .Data (page specific).
+   Navigation: link to /catalog and /my/loans for any logged-in user; for staff the links /staff/books, /staff/authors, /staff/categories, /staff/loans, /staff/reports; for admin also /admin/users; a logout form (POST /logout with the hidden csrf_token field) for logged-in users; links to /login and /register for anonymous users. Show the user's role by printing the string {{.User.Role}} directly.
+   If .Flash is not empty render <div class="flash {{if .FlashIsError}}flash-error{{end}}">{{msg .Flash}}</div>. Then {{template "content" .}} inside <main class="container">.
+   Every page template must define the blocks "title" and "content". The template function msg(key string) string is provided by the renderer (step 10.3).
+
+Do not modify any other files. No JavaScript anywhere.

@@ -1,0 +1,56 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add refresh token rotation.
+
+1. .env.example: add REFRESH_TTL_HOURS=168 and change JWT_TTL_MINUTES to 15.
+
+2. internal/service/auth_service.go (modify): NewAuthService additionally receives a repository.RefreshTokenRepository and a refresh TTL (time.Duration).
+   - Helper: generate a refresh token as 32 random bytes from crypto/rand encoded with base64.RawURLEncoding; store only its SHA-256 hex hash (crypto/sha256) in refresh_tokens with expires_at = now + refresh TTL.
+   - Login: besides the access token also create a refresh token and return it in AuthResponse.RefreshToken.
+   - Refresh(refreshToken string) (*model.AuthResponse, error): hash the value and look it up. Not found or expired -> ErrInvalidCredentials. If the token is already revoked this is a reuse attempt: revoke ALL refresh tokens of that user and return ErrInvalidCredentials. Otherwise revoke the used token (rotation), load the user, issue a new access token and a NEW refresh token, return both.
+   - Logout(refreshToken string) error: revoke the token if it exists; unknown tokens are ignored (return nil).
+
+3. internal/handler/auth_handler.go (modify): add POST /auth/refresh (RefreshRequest -> 200 AuthResponse, 401 for ErrInvalidCredentials, 422 for validation errors) and POST /auth/logout (RefreshRequest -> 204). Extend the AuthService interface in the handler file accordingly.
+
+4. cmd/api/main.go (modify): read REFRESH_TTL_HOURS (default 168), create the refresh token repository, pass it to NewAuthService, register POST /auth/refresh and POST /auth/logout as public routes under /api/v1.
+
+5. Update the existing tests only where the changed constructor signature or AuthResponse requires it, and add a service-level test with fake repositories: rotation returns a new pair, reuse of an old refresh token revokes all tokens of the user.
+
+Never log refresh tokens.

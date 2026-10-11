@@ -1,0 +1,58 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add configuration and dependencies for authentication and loans to the "libratrack" project.
+
+1. Update .env.example (keep all existing variables and add these):
+   JWT_SECRET=change-me-to-a-random-string-of-at-least-32-characters
+   JWT_TTL_MINUTES=60
+   ADMIN_EMAIL=admin@libratrack.local
+   ADMIN_PASSWORD=change-me-admin-password
+   SEED_DEMO_USERS=false
+   DEMO_USERS_PASSWORD=change-me-demo-password
+   LOAN_PERIOD_DAYS=14
+   FINE_PER_DAY=2
+   FINE_MAX=100
+   MAX_ACTIVE_LOANS=5
+
+2. Add dependencies to go.mod (do not change any Go source files yet):
+   - github.com/golang-jwt/jwt/v5
+   - golang.org/x/crypto (used for bcrypt)
+
+Do not modify any other files (.gitignore already ignores .env).

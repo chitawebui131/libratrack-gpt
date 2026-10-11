@@ -1,0 +1,41 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). Allowed imports ONLY: "errors", "net/http", "strconv", "github.com/gin-gonic/gin", "libratrack/internal/repository". Nothing else.
+
+Create internal/handler/errors.go (package handler).
+
+1. The error envelope is {"error": {"code": "...", "message": "...", "details": "..."}}.
+   func respondError(c *gin.Context, status int, code, message, details string)
+   Body: c.JSON(status, gin.H{"error": gin.H{"code": code, "message": message, "details": details}})
+
+2. func respondValidation(c *gin.Context, err error)
+   Calls respondError(c, http.StatusUnprocessableEntity, "validation_error", "request validation failed", err.Error())
+
+3. func respondRepoError(c *gin.Context, err error): maps the repository errors with errors.Is:
+   - repository.ErrNotFound -> 404, code "not_found", message "resource not found"
+   - repository.ErrConflict -> 409, code "conflict", message "resource already exists"
+   - repository.ErrInvalidReference -> 422, code "invalid_reference", message "referenced resource does not exist"
+   - anything else -> 500, code "internal_error", message "internal server error" (details must be an empty string for the 500 case)
+
+4. func parseID(c *gin.Context) (uint, bool):
+   v, err := strconv.ParseUint(c.Param("id"), 10, 32)
+   if err != nil || v == 0 { respondError(c, http.StatusBadRequest, "invalid_id", "invalid id", ""); return 0, false }
+   return uint(v), true

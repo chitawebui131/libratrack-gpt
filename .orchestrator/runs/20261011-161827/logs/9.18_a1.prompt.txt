@@ -1,0 +1,62 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Perform a final audit of the entire libratrack project after theme 9.
+
+Check and report (do not rewrite working code unless something is broken):
+
+1. Directory structure is unchanged (cmd/api, internal/model, handler, service, repository, middleware) plus migrations/, docker-compose.yml, .env.example. No new packages under internal/.
+2. go.mod contains github.com/golang-jwt/jwt/v5 and golang.org/x/crypto in addition to the theme 8 dependencies.
+3. Passwords: stored only as bcrypt hashes; User.PasswordHash has json:"-"; registration enforces min 8 and max 72 characters; the password never appears in a response, log or error.
+4. Registration always creates role "reader"; the role cannot be set through POST /auth/register.
+5. Login returns the same 401 error for an unknown email, a wrong password and an empty password hash, and calls CheckPasswordDummy for unknown emails.
+6. JWT: HS256 only (Verify pins the method and the issuer and requires exp); the secret comes from JWT_SECRET (at least 32 characters, the app fails fast otherwise); the token has a short TTL; the token string is never logged.
+7. AuthMiddleware returns 401 and RequireRoles returns 403 in the standard error envelope; CORS allows the Authorization header; the logging middleware does not log headers or bodies.
+8. The route matrix in main.go matches the table in the course (public / any authenticated / librarian+admin / admin only), and the old route paths are unchanged.
+9. GET /me/loans uses the user id from the token only; an admin cannot change their own role.
+10. Migrations 000003 (and 000004 if present) have .up.sql and .down.sql; loans has FKs with ON DELETE RESTRICT, CHECK constraints, the partial unique index (one active loan per copy) and the case-insensitive unique email index; AutoMigrate is not used anywhere.
+11. Loan Issue and Return each run in a single transaction with row locking (FOR UPDATE); the fine is calculated only by LoanPolicy.CalculateFine; money is an int, never a float; the policy values come from environment variables.
+12. EnsureUser never overwrites an existing user; demo users are created only when SEED_DEMO_USERS=true; no credentials are hardcoded in Go code or in migrations.
+13. (If refresh tokens were added) only SHA-256 hashes are stored; rotation revokes the used token; reuse of a revoked token revokes all tokens of the user.
+14. Tests exist for password, token, loan policy, middleware, auth and loan handlers (no DB needed) and for loan repository (skipped without TEST_DATABASE_URL); go test ./... passes.
+15. Swagger has the BearerAuth security definition and the protected endpoints carry @Security BearerAuth.
+16. No non-UTF8 or non-ASCII characters in any .go file; .env is in .gitignore.
+
+If everything is correct - reply with a short confirmation.
+If something is broken - make the minimal fix and show only the changed files.

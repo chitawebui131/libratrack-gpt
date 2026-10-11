@@ -1,0 +1,9 @@
+{
+  "spec": "tema8_small__1_.md",
+  "model": "ollama_chat/gemma4:26b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": []
+}

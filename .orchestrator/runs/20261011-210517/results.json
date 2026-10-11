@@ -1,0 +1,141 @@
+{
+  "model": "ollama_chat/gemma4-26b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": [
+    {
+      "step": "10.7",
+      "title": "«Мої видачі» (та поточний штраф)",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 73.7,
+      "aider_secs": 71.2,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.8",
+      "title": "Панель бібліотекаря: книги та примірники",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 73.6,
+      "aider_secs": 71.0,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.9",
+      "title": "Панель бібліотекаря: автори та категорії",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 73.4,
+      "aider_secs": 70.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.10",
+      "title": "Панель бібліотекаря: видачі, повернення, звіти",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 73.3,
+      "aider_secs": 70.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.11",
+      "title": "Адмін: керування користувачами",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 72.3,
+      "aider_secs": 69.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.12",
+      "title": "Підключення в main.go: веб-маршрути та групи доступу",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 72.7,
+      "aider_secs": 70.3,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.13",
+      "title": "(Опційно) Доопрацювання вигляду",
+      "level": "build",
+      "ok": true,
+      "attempts": 3,
+      "secs": 1463.9,
+      "aider_secs": 1126.6,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.14",
+      "title": "Тести без БД: шаблони, middleware, хендлери",
+      "level": "build",
+      "ok": true,
+      "attempts": 2,
+      "secs": 563.0,
+      "aider_secs": 138.8,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.15",
+      "title": "Інтеграційні тести каталогу (PostgreSQL)",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 70.3,
+      "aider_secs": 68.1,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.16",
+      "title": "Упаковка для портфоліо: Docker, README, ER-діаграма, CHANGELOG",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 71.6,
+      "aider_secs": 69.5,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.17",
+      "title": "Фінальна перевірка та дрібні виправлення",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 258.5,
+      "aider_secs": 256.2,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.18",
+      "title": "Перевірка готового коду (фінальний аудит)",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 237.8,
+      "aider_secs": 69.3,
+      "failed_check": "",
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages, comments and identifiers must be in English). User-facing Ukrainian text lives ONLY in web/templates/*.html and web/messages.json.
+- Keep code simple and correct for Go 1.22+. Use only the standard library plus Gin and the dependencies already in go.mod. No new dependencies.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. The only new top-level Go package is web/ (embedded templates and static files).
+- Web handlers only parse forms, call existing services/repositories and render templates. Business rules stay in internal/service.
+- Templates use html/template only. Never use template.HTML, template.JS, template.URL or similar on user data. No inline <script>, inline event handlers (onclick=...) or style="..." attributes (the Content-Security-Policy forbids them). No JavaScript at all, no CDN links, no external fonts.
+- Every state-changing form is a POST with a hidden csrf_token field and ends with a redirect (303 See Other, Post/Redirect/Get).
+- Never log or render passwords, hashes, tokens or cookies.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 9 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-9`; `docker compose up -d` — БД healthy.
+- У `.env` постав `JWT_TTL_MINUTES=60` або більше: сесія в браузері живе стільки ж, скільки JWT (refresh-токени з 9.15–9.16 веб-шар не використовує).
+- Відкрий `SEED_DEMO_USERS=true` у `.env` — матимеш готових `admin`, `librarian@libratrack.local` і `reader@libratrack.local` для ручних перевірок.
+- Додавай в Aider (`/add`) файли, які крок змінює.
+- **Прийми UX-рішення (таблиця нижче) до кроку 10.6.**
+
+**UX-рішення студента (межа ШІ):** що бачить читач, а що бібліотекар, і де стоїть кнопка повернення — це продуктові рішення. Нижче — значення, закладені в промпти; зміни їх свідомо, до запуску відповідних кроків.
+
+| Питання | Рішення в промптах |
+|---|---|
+| Каталог для анонімів | закритий: потрібен вхід (так само, як API у темі 9) |
+| Що робить читач на сторінці книги | бачить кількість доступних примірників і підказку «звернись до бібліотекаря» (самообслуговування й резервування — стретч-фіча) |
+| Хто бачить таблицю примірників | лише бібліотекар і адмін |
+| Як видати книгу | форма на сторінці книги: вибір доступного примірника + email читача |
+| Де кнопка «Прийняти повернення» | у списку активних видач у панелі бібліотекаря |
+| Прострочення | червоний бейдж + поточний штраф за правилами `LoanPolicy` |
+| Розмір сторінки каталогу | 12 книг |
+| Мова інтерфейсу | українська (тексти в шаблонах і `web/messages.json`) |
+
+**Карта веб-маршрутів (перевір перед кроком 10.12):**
+
+| Група | Маршрути | Доступ |
+|---|---|---|
+| Публічні | `GET /` (редирект), `GET/POST /login`, `GET/POST /register`, `/static/*` | усі |
+| Автентифіковані | `GET /catalog`, `GET /books/:id`, `GET /my/loans`, `POST /logout` | reader, librarian, admin |
+| Бібліотекар | `GET /staff/books`, `GET /staff/new-book`, `POST /staff/books`, `GET+POST /staff/books/:id/edit`, `POST /staff/books/:id/copies`, `GET+POST /staff/authors`, `GET+POST /staff/categories`, `GET /staff/loans`, `POST /staff/loans`, `POST /staff/loans/:id/return`, `GET /staff/reports` | librarian, admin |
+| Адмін | `POST /staff/books/:id/delete`, `GET /admin/users`, `POST /admin/users/:id/role` | admin |
+
+`/health`, `/swagger/*` і `/api/v1/*` залишаються як у темі 9. Cookie **не** автентифікує API-запити: API приймає лише `Authorization: Bearer`.
+
+Task:
+Add the staff pages for books and copies.
+
+1. web/templates/staff_books.html: "title" and "content". Data: .Data.Books ([]model.Book), .Data.PrevURL, .Data.NextURL. A "New book" link to /staff/new-book; a table with title, ISBN, category, authors, an "Edit" link, and (only if .User.IsAdmin) a delete form: method="post" action="/staff/books/{id}/delete", hidden csrf_token, a required checkbox confirm with value "yes" and the label "Yes, delete", and a submit button.
+
+2. web/templates/staff_book_form.html: "title" and "content" for both creating and editing. Data fields: Mode ("create" or "edit"), BookID uint, Title, ISBN, Publisher, Description, PublishedYear (strings, so the submitted text can be shown again), CategoryID uint, SelectedAuthorIDs []uint, Categories []model.Category, Authors []model.Author, Copies []model.Copy, plus the embedded FormErrors (.Data.ErrorKey, .Data.FieldKeys). Form: method="post", action "/staff/books" for create or "/staff/books/{id}/edit" for edit, hidden csrf_token; inputs title, isbn, publisher, published_year (type number), textarea description, select category_id, a multiple select author_ids (use hasID to mark selected options). In edit mode also show the copies table and a second form: method="post" action="/staff/books/{id}/copies" with hidden csrf_token, input inventory_no, select status (available, borrowed, lost, under_repair) and a submit button.
+
+3. internal/handler/web_staff_handler.go (package handler): NewWebStaffHandler(r *Renderer, books repository.BookRepository, authors repository.AuthorRepository, categories repository.CategoryRepository, copies repository.CopyRepository). Check the exact method signatures in internal/repository/book_repository.go and copy_repository.go and use them as they are.
+   - GET /staff/books: page param, limit 20, books.List without a category filter, render staff_books.html.
+   - GET /staff/new-book: empty form (Mode "create").
+   - POST /staff/books: build a model.CreateBookRequest from c.PostForm (title, isbn, publisher, description, published_year as int where an empty string means 0 and a non-number is a validation error, category_id as uint, author_ids with c.PostFormArray as []uint); validate with binding.Validator.ValidateStruct. Validation error: re-render the form with status 422, ErrorKey "error.validation", FieldKeys from FieldKeys(err) and all submitted values kept. repository.ErrConflict (duplicate ISBN): status 409 and "error.conflict". repository.ErrInvalidReference: 422 and "error.invalid_reference". Success: SetFlash "flash.book_created" and redirect 303 to /staff/books.
+   - GET /staff/books/:id/edit and POST /staff/books/:id/edit: same logic with model.UpdateBookRequest; invalid id or ErrNotFound gives the 404 page; success SetFlash "flash.book_updated" and redirect to /staff/books.
+   - POST /staff/books/:id/delete: if c.PostForm("confirm") != "yes" SetFlash "error.delete_not_confirmed" and redirect to /staff/books WITHOUT calling the repository; otherwise books.Delete (ErrNotFound gives the 404 page), SetFlash "flash.book_deleted", redirect 303 to /staff/books.
+   - POST /staff/books/:id/copies: build a model.CreateCopyRequest (inventory_no, status; an empty status means "available"), validate; book id from the path; ErrNotFound gives the 404 page; ErrConflict (duplicate inventory number) re-renders the edit form with status 409 and "error.conflict"; success SetFlash "flash.copy_created" and redirect 303 to /staff/books/{id}/edit.
+
+Do not modify main.go yet.

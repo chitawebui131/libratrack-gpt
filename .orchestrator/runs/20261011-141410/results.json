@@ -1,0 +1,20 @@
+{
+  "model": "ollama_chat/gemma4-e4b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": [
+    {
+      "step": "8.11",
+      "title": "Запуск міграцій (migrate.go)",
+      "level": "build",
+      "ok": false,
+      "attempts": 3,
+      "secs": 3383.1,
+      "aider_secs": 210.0,
+      "failed_check": "go vet ./...",
+      "detail": "CHECK FAILED: go vet ./...\ntimeout after 300s: go vet ./..."
+    }
+  ]
+}

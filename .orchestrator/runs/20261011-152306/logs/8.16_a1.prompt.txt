@@ -1,0 +1,37 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). The ONLY allowed import is "libratrack/internal/model". Nothing else. This is intentionally a NAIVE implementation for a teaching demo: do not optimize it.
+
+Create internal/repository/book_repository_list.go (package repository) with one method:
+
+func (r *gormBookRepository) List(categoryID uint, page, limit int) ([]model.Book, error)
+
+Logic, exactly:
+1. if page < 1 { page = 1 }; if limit < 1 { limit = 20 }; if limit > 100 { limit = 100 }
+2. q := r.db.Order("id ASC").Offset((page - 1) * limit).Limit(limit)
+3. if categoryID > 0 { q = q.Where("category_id = ?", categoryID) }
+4. var books []model.Book; if err := q.Find(&books).Error; err != nil { return nil, translateError(err) }
+5. Put this comment line directly above the loop: // NAIVE: N+1 queries, fixed in step 8.23
+   Then loop with an index: for i := range books { ... }
+   Inside the loop:
+   a) if err := r.db.Model(&books[i]).Association("Authors").Find(&books[i].Authors); err != nil { return nil, translateError(err) }
+   b) var cat model.Category; if err := r.db.First(&cat, books[i].CategoryID).Error; err == nil { books[i].Category = &cat }
+6. if books == nil { books = []model.Book{} }; return books, nil

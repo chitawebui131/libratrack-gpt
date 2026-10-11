@@ -1,0 +1,62 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages, comments and identifiers must be in English). User-facing Ukrainian text lives ONLY in web/templates/*.html and web/messages.json.
+- Keep code simple and correct for Go 1.22+. Use only the standard library plus Gin and the dependencies already in go.mod. No new dependencies.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. The only new top-level Go package is web/ (embedded templates and static files).
+- Web handlers only parse forms, call existing services/repositories and render templates. Business rules stay in internal/service.
+- Templates use html/template only. Never use template.HTML, template.JS, template.URL or similar on user data. No inline <script>, inline event handlers (onclick=...) or style="..." attributes (the Content-Security-Policy forbids them). No JavaScript at all, no CDN links, no external fonts.
+- Every state-changing form is a POST with a hidden csrf_token field and ends with a redirect (303 See Other, Post/Redirect/Get).
+- Never log or render passwords, hashes, tokens or cookies.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 9 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-9`; `docker compose up -d` — БД healthy.
+- У `.env` постав `JWT_TTL_MINUTES=60` або більше: сесія в браузері живе стільки ж, скільки JWT (refresh-токени з 9.15–9.16 веб-шар не використовує).
+- Відкрий `SEED_DEMO_USERS=true` у `.env` — матимеш готових `admin`, `librarian@libratrack.local` і `reader@libratrack.local` для ручних перевірок.
+- Додавай в Aider (`/add`) файли, які крок змінює.
+- **Прийми UX-рішення (таблиця нижче) до кроку 10.6.**
+
+**UX-рішення студента (межа ШІ):** що бачить читач, а що бібліотекар, і де стоїть кнопка повернення — це продуктові рішення. Нижче — значення, закладені в промпти; зміни їх свідомо, до запуску відповідних кроків.
+
+| Питання | Рішення в промптах |
+|---|---|
+| Каталог для анонімів | закритий: потрібен вхід (так само, як API у темі 9) |
+| Що робить читач на сторінці книги | бачить кількість доступних примірників і підказку «звернись до бібліотекаря» (самообслуговування й резервування — стретч-фіча) |
+| Хто бачить таблицю примірників | лише бібліотекар і адмін |
+| Як видати книгу | форма на сторінці книги: вибір доступного примірника + email читача |
+| Де кнопка «Прийняти повернення» | у списку активних видач у панелі бібліотекаря |
+| Прострочення | червоний бейдж + поточний штраф за правилами `LoanPolicy` |
+| Розмір сторінки каталогу | 12 книг |
+| Мова інтерфейсу | українська (тексти в шаблонах і `web/messages.json`) |
+
+**Карта веб-маршрутів (перевір перед кроком 10.12):**
+
+| Група | Маршрути | Доступ |
+|---|---|---|
+| Публічні | `GET /` (редирект), `GET/POST /login`, `GET/POST /register`, `/static/*` | усі |
+| Автентифіковані | `GET /catalog`, `GET /books/:id`, `GET /my/loans`, `POST /logout` | reader, librarian, admin |
+| Бібліотекар | `GET /staff/books`, `GET /staff/new-book`, `POST /staff/books`, `GET+POST /staff/books/:id/edit`, `POST /staff/books/:id/copies`, `GET+POST /staff/authors`, `GET+POST /staff/categories`, `GET /staff/loans`, `POST /staff/loans`, `POST /staff/loans/:id/return`, `GET /staff/reports` | librarian, admin |
+| Адмін | `POST /staff/books/:id/delete`, `GET /admin/users`, `POST /admin/users/:id/role` | admin |
+
+`/health`, `/swagger/*` і `/api/v1/*` залишаються як у темі 9. Cookie **не** автентифікує API-запити: API приймає лише `Authorization: Bearer`.
+
+Task:
+Update cmd/api/main.go.
+
+Configuration and setup:
+- Read COOKIE_SECURE (parse with strconv.ParseBool, default false; an invalid value logs a clear message and exits).
+- Load the embedded templates and messages: web.Templates(), web.Messages(), then handler.NewRenderer(tplFS, messages, cookieSecure). Exit with a clear log message on any error (the app must not start with broken templates).
+- Create the CatalogRepository and all web handlers (WebAuthHandler, WebCatalogHandler, WebLoansHandler, WebStaffHandler, WebUsersHandler), reusing the repositories and services that already exist. Do NOT call the REST API from the web handlers.
+
+Keep unchanged: gin.New(), the global middleware order (Recovery, Logging, CORS), GET /health with the DB ping, Swagger UI at /swagger/*any, ALL /api/v1 routes with their Bearer middleware and role groups, the package-level swag annotations, the startup admin/demo user bootstrap.
+
+Web routing (the security headers and CSRF middleware are applied ONLY to the web groups below, never globally, because the Content-Security-Policy would break Swagger UI):
+- forbidden := func(c *gin.Context) { renderer.Error(c, http.StatusForbidden, "error.forbidden") }, csrfFail := func(c *gin.Context) { renderer.Error(c, http.StatusForbidden, "error.csrf") }
+- web := r.Group("", middleware.SecurityHeaders(), middleware.CSRFMiddleware(cookieSecure, csrfFail))
+- public := web.Group("", middleware.WebOptionalAuth(tokenManager)): GET / (303 redirect to /catalog), GET and POST /login, GET and POST /register
+- authed := web.Group("", middleware.WebAuthMiddleware(tokenManager)): GET /catalog, GET /books/:id, GET /my/loans, POST /logout
+- staff := authed.Group("", middleware.WebRequireRoles(forbidden, model.RoleLibrarian, model.RoleAdmin)): GET /staff/books, GET /staff/new-book, POST /staff/books, GET and POST /staff/books/:id/edit, POST /staff/books/:id/copies, GET and POST /staff/authors, GET and POST /staff/categories, GET /staff/loans, POST /staff/loans, POST /staff/loans/:id/return, GET /staff/reports
+- admin := authed.Group("", middleware.WebRequireRoles(forbidden, model.RoleAdmin)): POST /staff/books/:id/delete, GET /admin/users, POST /admin/users/:id/role
+- Static files: serve web.Static() under /static through a group that uses only middleware.SecurityHeaders(), for example r.Group("/static", middleware.SecurityHeaders()).StaticFS("/", http.FS(staticFS)).
+- r.NoRoute: if the path starts with /api/ respond with the JSON envelope {"error": {"code": "not_found", "message": "route not found", "details": ""}} and status 404; otherwise render the HTML 404 page with renderer.Error(c, 404, "error.not_found") (run it through the SecurityHeaders middleware).

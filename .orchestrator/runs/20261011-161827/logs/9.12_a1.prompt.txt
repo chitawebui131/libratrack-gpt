@@ -1,0 +1,52 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Update only the swag annotations (comments), no code changes.
+
+1. In cmd/api/main.go add package-level annotations:
+   // @securityDefinitions.apikey BearerAuth
+   // @in header
+   // @name Authorization
+   // @description Type "Bearer" followed by a space and the JWT token.
+
+2. For the new handlers (auth_handler.go, loan_handler.go, user_handler.go) add swag annotations to every method: @Summary, @Tags, @Accept json, @Produce json, @Param (body or path/query), @Success, @Failure (400/401/403/404/409/422 where applicable), @Router. Add "@Security BearerAuth" to every method except register and login.
+
+3. If the existing book, author, category and copy handlers already have swag annotations, add "@Security BearerAuth" and the @Failure 401 / 403 lines that apply to them. If they have no annotations, leave them untouched.
+
+Do not edit anything under docs/ (it is generated). Do not change any Go code, only comments.

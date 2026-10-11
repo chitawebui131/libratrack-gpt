@@ -1,0 +1,57 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages, comments and identifiers must be in English). User-facing Ukrainian text lives ONLY in web/templates/*.html and web/messages.json.
+- Keep code simple and correct for Go 1.22+. Use only the standard library plus Gin and the dependencies already in go.mod. No new dependencies.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. The only new top-level Go package is web/ (embedded templates and static files).
+- Web handlers only parse forms, call existing services/repositories and render templates. Business rules stay in internal/service.
+- Templates use html/template only. Never use template.HTML, template.JS, template.URL or similar on user data. No inline <script>, inline event handlers (onclick=...) or style="..." attributes (the Content-Security-Policy forbids them). No JavaScript at all, no CDN links, no external fonts.
+- Every state-changing form is a POST with a hidden csrf_token field and ends with a redirect (303 See Other, Post/Redirect/Get).
+- Never log or render passwords, hashes, tokens or cookies.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 9 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-9`; `docker compose up -d` — БД healthy.
+- У `.env` постав `JWT_TTL_MINUTES=60` або більше: сесія в браузері живе стільки ж, скільки JWT (refresh-токени з 9.15–9.16 веб-шар не використовує).
+- Відкрий `SEED_DEMO_USERS=true` у `.env` — матимеш готових `admin`, `librarian@libratrack.local` і `reader@libratrack.local` для ручних перевірок.
+- Додавай в Aider (`/add`) файли, які крок змінює.
+- **Прийми UX-рішення (таблиця нижче) до кроку 10.6.**
+
+**UX-рішення студента (межа ШІ):** що бачить читач, а що бібліотекар, і де стоїть кнопка повернення — це продуктові рішення. Нижче — значення, закладені в промпти; зміни їх свідомо, до запуску відповідних кроків.
+
+| Питання | Рішення в промптах |
+|---|---|
+| Каталог для анонімів | закритий: потрібен вхід (так само, як API у темі 9) |
+| Що робить читач на сторінці книги | бачить кількість доступних примірників і підказку «звернись до бібліотекаря» (самообслуговування й резервування — стретч-фіча) |
+| Хто бачить таблицю примірників | лише бібліотекар і адмін |
+| Як видати книгу | форма на сторінці книги: вибір доступного примірника + email читача |
+| Де кнопка «Прийняти повернення» | у списку активних видач у панелі бібліотекаря |
+| Прострочення | червоний бейдж + поточний штраф за правилами `LoanPolicy` |
+| Розмір сторінки каталогу | 12 книг |
+| Мова інтерфейсу | українська (тексти в шаблонах і `web/messages.json`) |
+
+**Карта веб-маршрутів (перевір перед кроком 10.12):**
+
+| Група | Маршрути | Доступ |
+|---|---|---|
+| Публічні | `GET /` (редирект), `GET/POST /login`, `GET/POST /register`, `/static/*` | усі |
+| Автентифіковані | `GET /catalog`, `GET /books/:id`, `GET /my/loans`, `POST /logout` | reader, librarian, admin |
+| Бібліотекар | `GET /staff/books`, `GET /staff/new-book`, `POST /staff/books`, `GET+POST /staff/books/:id/edit`, `POST /staff/books/:id/copies`, `GET+POST /staff/authors`, `GET+POST /staff/categories`, `GET /staff/loans`, `POST /staff/loans`, `POST /staff/loans/:id/return`, `GET /staff/reports` | librarian, admin |
+| Адмін | `POST /staff/books/:id/delete`, `GET /admin/users`, `POST /admin/users/:id/role` | admin |
+
+`/health`, `/swagger/*` і `/api/v1/*` залишаються як у темі 9. Cookie **не** автентифікує API-запити: API приймає лише `Authorization: Bearer`.
+
+Task:
+Add the "My loans" page.
+
+1. internal/service/loan_service.go (modify): add the method ProjectedFine(l *model.Loan) int. If l.ReturnedAt is not nil return l.FineAmount; otherwise return s.policy.CalculateFine(l.DueAt, s.now().UTC()). Do not duplicate any fine arithmetic.
+
+2. web/templates/my_loans.html. Defines "title" and "content". Data: .Data.Rows (a slice of LoanRow with fields Loan model.Loan, Overdue bool, Fine int), .Data.PrevURL, .Data.NextURL. A table: book title (link to /books/{Loan.Copy.Book.ID}), borrowed date, due date, return date (dateptr), status badge (returned = badge-ok, overdue = badge-overdue, otherwise badge-warn "active"), fine in UAH (show the Fine column only as a number). Empty state when there are no loans.
+
+3. internal/handler/web_loans_handler.go (package handler):
+   - Define a small interface webLoanService in this file with the methods ListByUser(userID uint, page, limit int) ([]model.Loan, error), List(status string, page, limit int) ([]model.Loan, error), Issue(copyID, userID uint) (*model.Loan, error), Return(loanID uint) (*model.Loan, error) and ProjectedFine(l *model.Loan) int.
+   - type LoanRow struct { Loan model.Loan; Overdue bool; Fine int }
+   - NewWebLoansHandler(r *Renderer, loans webLoanService) (more dependencies are added in later steps).
+   - GET /my/loans: the user id comes ONLY from middleware.CurrentUser (never from query or form); page param (default 1), limit 20; build the rows in Go: Overdue = ReturnedAt == nil and time.Now().UTC() is after DueAt, Fine = loans.ProjectedFine; render my_loans.html. The template contains no business logic.
+
+Do not modify main.go yet.

@@ -1,0 +1,63 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add user storage, the authentication service and the auth endpoints.
+
+1. internal/repository/user_repository.go (package repository)
+   - UserRepository interface: Create(user *model.User) error, FindByID(id uint) (*model.User, error), FindByEmail(email string) (*model.User, error), List(page, limit int) ([]model.User, error), UpdateRole(id uint, role string) (*model.User, error)
+   - gormUserRepository implementation, constructor NewUserRepository(db *gorm.DB) UserRepository
+   - FindByEmail compares with lower(email) = lower(?). List: defaults page=1, limit=20, max limit=100, ordered by id. UpdateRole returns ErrNotFound if no rows were affected and returns the reloaded user.
+   - All errors pass through translateError (a duplicate email gives ErrConflict).
+
+2. internal/service/auth_service.go (package service)
+   - var ErrInvalidCredentials = errors.New("invalid credentials"), var ErrEmailTaken = errors.New("email already registered")
+   - type AuthService struct and constructor NewAuthService(users repository.UserRepository, tokens *TokenManager) *AuthService
+   - Register(req model.RegisterRequest) (*model.User, error): normalize the email (trim spaces, lower case) and full name (trim), hash the password with HashPassword, ALWAYS set Role = model.RoleReader (never take the role from the request), call users.Create; ErrConflict becomes ErrEmailTaken.
+   - Login(email, password string) (*model.AuthResponse, error): normalize the email; FindByEmail; if the user does not exist call CheckPasswordDummy(password) and return ErrInvalidCredentials; if PasswordHash is empty or CheckPassword fails return ErrInvalidCredentials (the same error in all cases); otherwise issue a token and return AuthResponse{AccessToken, TokenType "Bearer", ExpiresIn = int(tokens.TTL().Seconds()), User}.
+   - GetByID(id uint) (*model.User, error): passthrough to the repository.
+   - EnsureUser(email, password, fullName, role string) error: idempotent bootstrap helper. Validate the role with model.IsValidRole and require a password of at least 8 characters. If a user with this email already exists return nil WITHOUT changing anything (never overwrite an existing password or role). Otherwise create the user with a bcrypt hash.
+
+3. internal/handler/auth_handler.go (package handler)
+   - Define a small interface AuthService in this file with the methods Register, Login, GetByID (same signatures as above) and constructor NewAuthHandler(svc AuthService).
+   - POST /auth/register: ShouldBindJSON(model.RegisterRequest); 201 with the created user (the password hash is never serialized); 409 if ErrEmailTaken; 422 for validation errors.
+   - POST /auth/login: ShouldBindJSON(model.LoginRequest); 200 with AuthResponse; 401 with message "invalid email or password" for ErrInvalidCredentials; 422 for validation errors.
+   - GET /me: take the user id with middleware.CurrentUser, load the user via GetByID, return 200; if not found respond 401.
+   - Same conventions and the same error-response helper as the other handlers.
+
+Do not modify main.go yet.

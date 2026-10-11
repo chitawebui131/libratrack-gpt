@@ -1,0 +1,54 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add authentication and role-based access control middleware to internal/middleware/.
+
+1. internal/middleware/auth.go (package middleware)
+   - type TokenVerifier interface { Verify(token string) (userID uint, role string, err error) }
+   - unexported context keys for user id and role
+   - func AuthMiddleware(v TokenVerifier) gin.HandlerFunc: read the Authorization header; it must have the form "Bearer <token>" (scheme compared case-insensitively). If the header is missing, malformed or the token fails verification: abort with 401, set header "WWW-Authenticate: Bearer", and respond with the JSON envelope {"error": {"code": "unauthorized", "message": "authentication required", "details": ""}}. Use the same generic message for all failure reasons. On success store user id and role in the Gin context and call c.Next().
+   - func RequireRoles(roles ...string) gin.HandlerFunc: if there is no user in the context respond 401 (same envelope as above); if the role is not in the allowed list abort with 403 and {"error": {"code": "forbidden", "message": "insufficient permissions", "details": ""}}. Otherwise c.Next().
+   - func CurrentUser(c *gin.Context) (userID uint, role string, ok bool)
+   - Write the error envelope with a small unexported helper inside the middleware package (do not import the handler package).
+
+2. Update the file that defines CORSMiddleware, ONLY if needed: Access-Control-Allow-Headers must include both Content-Type and Authorization. Do not change the other behavior.
+
+3. Check the existing logging middleware: it must not log request headers or bodies. If it does, remove that; if it does not, leave the file unchanged.
+
+Do not modify main.go yet.

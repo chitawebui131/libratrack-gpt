@@ -1,0 +1,64 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add the loan repository with transactional operations.
+
+1. internal/repository/errors.go (modify the existing file): add package-level errors ErrCopyNotAvailable, ErrLoanLimitReached, ErrAlreadyReturned. Do not change the existing errors or translateError.
+
+2. internal/repository/loan_repository.go (package repository):
+   - LoanRepository interface:
+     * Issue(copyID, userID uint, borrowedAt, dueAt time.Time, maxActiveLoans int) (*model.Loan, error)
+     * Return(loanID uint, returnedAt time.Time, calcFine func(dueAt, returnedAt time.Time) int) (*model.Loan, error)
+     * List(status string, page, limit int) ([]model.Loan, error)
+     * ListByUser(userID uint, page, limit int) ([]model.Loan, error)
+   - gormLoanRepository implementation, constructor NewLoanRepository(db *gorm.DB) LoanRepository
+   - Issue, all in ONE transaction:
+     a) lock the copy row with clause.Locking{Strength: "UPDATE"}; if it does not exist return ErrInvalidReference;
+     b) if the copy status is not model.CopyStatusAvailable return ErrCopyNotAvailable;
+     c) lock the user row the same way; if it does not exist return ErrInvalidReference;
+     d) count the user's loans WHERE returned_at IS NULL; if the count >= maxActiveLoans return ErrLoanLimitReached;
+     e) insert the loan (BorrowedAt, DueAt, FineAmount 0);
+     f) update the copy status to "borrowed" and updated_at;
+     g) reload the loan with Preload("Copy.Book") and return it.
+   - Return, all in ONE transaction: lock the loan row FOR UPDATE (ErrNotFound if missing); if ReturnedAt is already set return ErrAlreadyReturned; set returned_at = returnedAt and fine_amount = calcFine(loan.DueAt, returnedAt); set the copy status back to "available" and updated_at; reload with Preload("Copy.Book") and return.
+   - List: status is optional ("" = all). "active" = returned_at IS NULL; "returned" = returned_at IS NOT NULL; "overdue" = returned_at IS NULL AND due_at < now(). Use Preload("Copy.Book") and Preload("User"). Order by borrowed_at DESC, id DESC. Pagination defaults: page=1, limit=20, max limit=100.
+   - ListByUser: same pagination and ordering, filtered by user_id, Preload("Copy.Book").
+   - All errors pass through translateError. A unique violation from the partial index (race) becomes ErrConflict through translateError.
+
+Do not modify any other files.

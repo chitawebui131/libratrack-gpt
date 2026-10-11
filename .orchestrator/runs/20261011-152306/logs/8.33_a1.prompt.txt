@@ -1,0 +1,34 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file migrations/000002_seed_demo_data.up.sql (whole file, never a diff, no explanations). Keep the two existing INSERT statements (categories and authors) EXACTLY as they are and append the following at the end. Plain SQL, ASCII only.
+
+INSERT INTO books (id, title, isbn, category_id, publisher, published_year, description) VALUES
+  (1, 'The Go Programming Language', '9780134190440', 1, 'Addison-Wesley', 2015, 'A complete guide to Go.'),
+  (2, 'Clean Code', '9780132350884', 1, 'Prentice Hall', 2008, 'A handbook of agile software craftsmanship.'),
+  (3, 'The Pragmatic Programmer', '9780135957059', 1, 'Addison-Wesley', 2019, 'Your journey to mastery.'),
+  (4, 'Dune', '9780441013593', 2, 'Ace', 2005, 'A science fiction classic.'),
+  (5, 'Foundation', '9780553293357', 2, 'Bantam Spectra', 1991, 'The first novel of the Foundation series.'),
+  (6, 'I, Robot', '9780553382563', 2, 'Bantam Spectra', 2004, 'A collection of robot stories.'),
+  (7, 'A Brief History of Time', '9780553380163', 3, 'Bantam', 1998, 'From the Big Bang to black holes.'),
+  (8, 'Sapiens', '9780062316110', 4, 'Harper', 2015, 'A brief history of humankind.');
+
+INSERT INTO book_authors (book_id, author_id) VALUES
+  (1, 1), (1, 2), (2, 3), (3, 4), (3, 5), (4, 6), (5, 7), (6, 7), (7, 8), (8, 9);

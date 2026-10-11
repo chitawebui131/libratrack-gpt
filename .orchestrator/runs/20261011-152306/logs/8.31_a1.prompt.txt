@@ -1,0 +1,32 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). Keep ALL existing imports that are still used, the swag annotations, the Swagger route, the middleware registration order (Recovery, Logging, CORS), the config reading, the migrations call, the database connection and the existing book routes EXACTLY as they are in the current file. Additional allowed imports: "context", "net/http", "time".
+
+Update cmd/api/main.go:
+1. After creating bookRepo and bookHandler, also create authorRepo := repository.NewAuthorRepository(db), categoryRepo := repository.NewCategoryRepository(db), copyRepo := repository.NewCopyRepository(db), and handlers authorHandler := handler.NewAuthorHandler(authorRepo), categoryHandler := handler.NewCategoryHandler(categoryRepo), copyHandler := handler.NewCopyHandler(copyRepo).
+2. Register in the /api/v1 group, in addition to the book routes:
+   POST /books/:id/copies -> copyHandler.Create
+   GET /books/:id/copies -> copyHandler.ListByBook
+   GET /books/:id/availability -> copyHandler.Availability
+   POST /authors -> authorHandler.Create; GET /authors -> authorHandler.List; GET /authors/:id -> authorHandler.GetByID
+   POST /categories -> categoryHandler.Create; GET /categories -> categoryHandler.List; GET /categories/:id -> categoryHandler.GetByID
+3. Change GET /health: get sqlDB, err := db.DB(); create ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second); defer cancel(); if err != nil or sqlDB.PingContext(ctx) fails, respond c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error"}); otherwise c.JSON(http.StatusOK, gin.H{"status": "ok"}).
+Do not add detailed @Summary/@Param annotations.

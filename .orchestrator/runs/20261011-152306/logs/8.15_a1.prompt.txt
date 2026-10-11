@@ -1,0 +1,62 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). Allowed imports ONLY: "gorm.io/gorm", "gorm.io/gorm/clause", "libratrack/internal/model". Nothing else. Methods List, Update and Delete are implemented in OTHER files, do NOT implement them here.
+
+Create internal/repository/book_repository.go (package repository).
+
+1. The interface:
+   type BookRepository interface {
+       Create(book *model.Book, authorIDs []uint) error
+       FindByID(id uint) (*model.Book, error)
+       List(categoryID uint, page, limit int) ([]model.Book, error)
+       Update(book *model.Book, authorIDs []uint) error
+       Delete(id uint) error
+   }
+
+2. type gormBookRepository struct { db *gorm.DB }
+   func NewBookRepository(db *gorm.DB) BookRepository { return &gormBookRepository{db: db} }
+
+3. Helper func uniqueIDs(ids []uint) []uint: returns the IDs without duplicates, keeping the original order.
+
+4. Helper func loadAuthors(tx *gorm.DB, ids []uint) ([]model.Author, error):
+   - ids = uniqueIDs(ids)
+   - var authors []model.Author
+   - if err := tx.Where("id IN ?", ids).Find(&authors).Error; err != nil return nil, err
+   - if len(authors) != len(ids) return nil, ErrInvalidReference (some author does not exist)
+   - return authors, nil
+
+5. Method (r *gormBookRepository) Create(book *model.Book, authorIDs []uint) error:
+   err := r.db.Transaction(func(tx *gorm.DB) error {
+       authors, err := loadAuthors(tx, authorIDs)
+       if err != nil { return err }
+       book.Authors = nil
+       book.Category = nil
+       book.Copies = nil
+       if err := tx.Omit(clause.Associations).Create(book).Error; err != nil { return err }
+       return tx.Model(book).Association("Authors").Replace(authors)
+   })
+   if err != nil { return translateError(err) }
+   then reload: var fresh model.Book; if err := r.db.Preload("Authors").Preload("Category").First(&fresh, book.ID).Error; err != nil { return translateError(err) }; *book = fresh; return nil
+
+6. Method (r *gormBookRepository) FindByID(id uint) (*model.Book, error):
+   var b model.Book
+   if err := r.db.Preload("Authors").Preload("Category").Preload("Copies").First(&b, id).Error; err != nil { return nil, translateError(err) }
+   return &b, nil

@@ -1,0 +1,54 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format.
+- No explanations, no extra text, no markdown outside the code blocks.
+- Do not invent extra files or change the directory structure, except the files explicitly listed in the step.
+- Use only UTF-8. Never insert non-ASCII characters into .go files (error messages and comments must be in English).
+- Keep code simple and correct for Go 1.22+.
+- Keep the layers: cmd/api, internal/model, internal/handler, internal/service, internal/repository, internal/middleware. Do not create new internal/ packages. Handlers only bind input, call a service or repository and map errors to HTTP statuses. Business rules live in internal/service. Repositories only access data.
+- Security rules: never log, print or return passwords, password hashes, the JWT secret or tokens. Never hardcode secrets in Go code. Do not use dependencies other than those from step 9.1.
+- Every error response (including 401 and 403) uses the existing envelope {"error": {"code": "...", "message": "...", "details": "..."}}.
+- Do NOT use AutoMigrate anywhere; the schema is managed only by golang-migrate.
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 8 збирається, тести проходять (`go build ./... && go test ./...`), є тег `theme-8`.
+- `docker compose up -d` — БД у статусі healthy.
+- Згенеруй секрет для JWT: `openssl rand -base64 48`. Вставиш його у свій `.env` (НЕ в `.env.example` і не в Git).
+- У Aider додавай у чат (`/add`) файли, які крок змінює (`main.go`, `book_handler.go`, `errors.go` тощо).
+- **Прийми бізнес-рішення (див. таблицю нижче) до кроку 9.7.**
+
+**Рішення студента (межа ШІ):** розрахунок штрафу й правила видачі — це продуктові рішення, які ШІ приймати не повинен. Якщо в промпті немає чіткого правила, агент вигадає своє. Нижче — значення за замовчуванням, використані в промптах; обговори їх (з ментором або з «бібліотекарем») і за потреби зміни в `.env.example` (9.1), промпті 9.7 і тестах 9.13.
+
+| Питання | Значення в промптах |
+|---|---|
+| Строк видачі | 14 днів |
+| Штраф за кожен прострочений день | 2 грн (цілі гривні, без float) |
+| Максимальний штраф за одну видачу | 100 грн |
+| Як рахувати прострочені дні | повні календарні дні за UTC після дати повернення за графіком |
+| Макс. активних видач на читача | 5 |
+
+**Матриця доступу (перевір перед кроком 9.11):**
+
+| Ендпоінт | Хто має доступ |
+|---|---|
+| `GET /health`, `GET /swagger/*`, `POST /auth/register`, `POST /auth/login` | усі (без токена) |
+| `GET /me`, `GET /me/loans`, усі `GET` каталогу (books, authors, categories, copies, availability) | будь-який автентифікований (reader, librarian, admin) |
+| `POST /books`, `PUT /books/:id`, `POST /books/:id/copies`, `POST /authors`, `POST /categories` | librarian, admin |
+| `POST /loans`, `POST /loans/:id/return`, `GET /loans` | librarian, admin |
+| `DELETE /books/:id`, `GET /users`, `PUT /users/:id/role` | admin |
+
+Task:
+Add integration tests for loans in internal/repository/loan_repository_test.go (package repository). Standard library only.
+
+First, update the existing helper setupTestDB in internal/repository/repository_test.go so that it also truncates the "loans" table (add it to the TRUNCATE ... RESTART IDENTITY CASCADE list). Do not change anything else in that file.
+
+Tests in the new file (skip with t.Skip("TEST_DATABASE_URL is not set") when the variable is empty, using setupTestDB):
+- Issue: a successful loan sets the copy status to "borrowed" and returns a loan with due_at and Copy.Book loaded.
+- Issue the same copy twice -> ErrCopyNotAvailable.
+- Issue with a non-existing copy and with a non-existing user -> ErrInvalidReference.
+- Limit: with maxActiveLoans = 2 the third loan of one user returns ErrLoanLimitReached.
+- Return: sets returned_at, writes fine_amount from the calcFine function (use a stub function returning a fixed number), sets the copy status back to "available".
+- Return twice -> ErrAlreadyReturned; Return of a non-existing loan -> ErrNotFound.
+- List with status "active", "returned" and "overdue" (create an overdue loan by inserting a row with due_at in the past directly through GORM) and ListByUser with pagination.
+- Concurrency: start 5 goroutines issuing the same available copy to 5 different users at the same time; exactly one must succeed and the others must return ErrCopyNotAvailable or ErrConflict.
+
+All tests must pass with TEST_DATABASE_URL set (also with -race) and be skipped when it is not set.

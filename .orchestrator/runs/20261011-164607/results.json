@@ -1,0 +1,75 @@
+{
+  "model": "ollama_chat/gemma4-e4b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": [
+    {
+      "step": "10.1",
+      "title": "Каркас: embed, повідомлення, CSS, базовий layout",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 72.6,
+      "aider_secs": 70.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.2",
+      "title": "Веб-middleware: cookie-автентифікація, CSRF, заголовки безпеки",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 235.3,
+      "aider_secs": 233.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.3",
+      "title": "Рендерер шаблонів, flash-повідомлення, сторінка помилки",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 70.2,
+      "aider_secs": 68.3,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.4",
+      "title": "Сторінки входу, реєстрації та виходу",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 71.0,
+      "aider_secs": 69.2,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.5",
+      "title": "Репозиторій каталогу: пошук, фільтри, популярні книги",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 705.3,
+      "aider_secs": 703.7,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "10.6",
+      "title": "Каталог і сторінка книги",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 70.4,
+      "aider_secs": 68.6,
+      "failed_check": "",
+      "detail": ""
+    }
+  ]
+}
