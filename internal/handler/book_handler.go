@@ -192,3 +192,12 @@ func (h *BookHandler) Delete(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// RegisterRoutes registers the book-related routes on the provided router group.
+func (h *BookHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.POST("/books", h.Create)
+	rg.GET("/books", h.List)
+	rg.GET("/books/:id", h.GetByID)
+	rg.PUT("/books/:id", h.Update)
+	rg.DELETE("/books/:id", h.Delete)
+}
