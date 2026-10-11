@@ -65,6 +65,18 @@
       "model": "ollama_chat/gemma4:26b",
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.6",
+      "title": "Модель Copy і BookAvailability",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 296.6,
+      "aider_secs": 294.1,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
