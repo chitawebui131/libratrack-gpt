@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/gemma4-26b",
+  "model": "ollama_chat/gemma4:26b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -48,28 +48,39 @@
         "8.43"
       ],
       "last_failed": null
+    },
+    "tema10.md": {
+      "completed": [
+        "10.1",
+        "10.2",
+        "10.3",
+        "10.4",
+        "10.5",
+        "10.6",
+        "10.7",
+        "10.8",
+        "10.9",
+        "10.10",
+        "10.11",
+        "10.12",
+        "10.13",
+        "10.14",
+        "10.15",
+        "10.16",
+        "10.17",
+        "10.18"
+      ],
+      "last_failed": null
     }
   },
-  "queue": [],
-  "completed": [
-    "10.1",
-    "10.2",
-    "10.3",
-    "10.4",
-    "10.5",
-    "10.6",
-    "10.7",
-    "10.8",
-    "10.9",
-    "10.10",
-    "10.11",
-    "10.12",
-    "10.13",
-    "10.14",
-    "10.15",
-    "10.16",
-    "10.17"
-  ],
-  "last_failed": null,
-  "spec": "tema10.md"
+  "queue": [
+    {
+      "id": "730e0861",
+      "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema8_small__1_.md",
+      "from_step": "",
+      "to": "",
+      "only": "",
+      "include_skipped": false
+    }
+  ]
 }
