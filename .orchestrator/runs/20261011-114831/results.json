@@ -81,6 +81,17 @@
       "aider_secs": 64.8,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.8",
+      "title": "Міграція 000001, частина 1: categories, authors, books",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 72.1,
+      "aider_secs": 69.9,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
