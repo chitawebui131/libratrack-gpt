@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/gemma4-e4b",
+  "model": "ollama_chat/gemma4-26b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -57,7 +57,8 @@
     "10.3",
     "10.4",
     "10.5",
-    "10.6"
+    "10.6",
+    "10.7"
   ],
   "last_failed": null,
   "spec": "tema10.md"
