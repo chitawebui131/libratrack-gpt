@@ -131,3 +131,45 @@ func (h *BookHandler) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, books)
 }
+
+// Update handles updating an existing book.
+func (h *BookHandler) Update(c *gin.Context) {
+	id, ok := parseID(c)
+	if !ok {
+		return
+	}
+
+	var req model.UpdateBookRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid request body", err.Error())
+		return
+	}
+
+	book, err := h.repo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
+			return
+		}
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not load book", "")
+		return
+	}
+
+	book.Title = req.Title
+	book.ISBN = req.ISBN
+	book.Author = req.Author
+	book.Category = req.Category
+	book.PublishedYear = req.PublishedYear
+	book.Description = req.Description
+
+	if err := h.repo.Update(book); err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
+			return
+		}
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not update book", "")
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
+}
