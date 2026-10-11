@@ -1,0 +1,78 @@
+
+Aider v0.86.2
+Model: ollama_chat/gpt-oss:20b with whole edit format
+Git repo: .git with 16 files
+Repo-map: disabled
+Added cmd/api/main.go to the chat.
+
+
+--------------
+► **THINKING**
+
+We need to modify cmd/api/main.go. Add package-level swag annotations comment block above func main. Add imports ginSwagger and swaggerFiles. Add blank import _ "libratrack/docs". Add router.GET("/swagger/*any", 
+ginSwagger.WrapHandler(swaggerFiles.Handler)). Keep existing code unchanged.
+
+Let's produce updated file content.
+
+Original file:
+
+package main
+
+import (
+        "github.com/gin-gonic/gin"
+)
+
+func main() {
+        router := gin.New()
+        router.GET("/health", func(c *gin.Context) {
+                c.JSON(200, gin.H{"status": "ok"})
+        })
+        router.Run(":8080")
+}
+
+We need to add imports: ginSwagger "github.com/swaggo/gin-swagger", swaggerFiles "github.com/swaggo/files", and blank import _ "libratrack/docs". Also add comment block above func main.
+
+Also add router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+Let's produce final file.
+
+Check formatting: comment block lines start with //.
+
+Also ensure imports are grouped. Use parentheses.
+
+Let's produce final file listing.
+
+------------
+► **ANSWER**
+
+cmd/api/main.go
+
+```diff
+@@ -1,13 +1,21 @@
+ package main
+ 
+ import (
+        "github.com/gin-gonic/gin"
++       ginSwagger "github.com/swaggo/gin-swagger"
++       swaggerFiles "github.com/swaggo/files"
++       _ "libratrack/docs"
+ )
+ 
++// @title Libratrack API
++// @version 1.0
++// @description REST API for a library catalog.
++// @BasePath /api/v1
+ func main() {
+        router := gin.New()
+        router.GET("/health", func(c *gin.Context) {
+                c.JSON(200, gin.H{"status": "ok"})
+        })
++       router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+        router.Run(":8080")
+ }
+```
+
+
+Tokens: 1.1k sent, 381 received.
+Applied edit to cmd/api/main.go
+Commit ddc0424 feat: add Swagger UI support to API endpoint and annotations

@@ -1,0 +1,53 @@
+
+Creating empty file /home/user/libratrack-gpt/internal/middleware/middleware.go
+Aider v0.86.2
+Model: ollama_chat/gpt-oss:20b with whole edit format
+Git repo: .git with 15 files
+Repo-map: disabled
+Added internal/middleware/middleware.go to the chat.
+
+
+--------------
+► **THINKING**
+
+We need to create internal/middleware/middleware.go with package middleware, import gin, log, time. Provide LoggingMiddleware function. Ensure no unused imports. Use gin.HandlerFunc. Use log.Printf. Format: method, path, 
+status, duration. Use c.Request.Method, c.Request.URL.Path, c.Writer.Status(), time.Since(start). Use log.Printf with format string. Ensure imports: "github.com/gin-gonic/gin", "log", "time". No other imports. Ensure Go 
+1.22+. Provide file listing.
+
+------------
+► **ANSWER**
+
+internal/middleware/middleware.go
+
+```diff
+@@ -0,0 +1,22 @@
++package middleware
++
++import (
++       "log"
++       "time"
++
++       "github.com/gin-gonic/gin"
++)
++
++func LoggingMiddleware() gin.HandlerFunc {
++       return func(c *gin.Context) {
++               start := time.Now()
++               c.Next()
++               duration := time.Since(start)
++               log.Printf("%s %s %d %s",
++                       c.Request.Method,
++                       c.Request.URL.Path,
++                       c.Writer.Status(),
++                       duration,
++               )
++       }
++}
+```
+
+
+Tokens: 942 sent, 219 received.
+Committing internal/middleware/middleware.go before applying edits.
+Commit 8e6f887 feat: add middleware package to internal/middleware/middleware.go
+Applied edit to internal/middleware/middleware.go
+Commit 0e74e15 feat: add logging middleware to record request details and duration

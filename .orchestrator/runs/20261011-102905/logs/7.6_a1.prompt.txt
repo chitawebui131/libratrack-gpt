@@ -1,0 +1,26 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format (unless a step explicitly says otherwise, as the audit step does).
+- No explanations, no extra text, no markdown outside the code blocks (same exception).
+- Edit only the files named in the step. Do not invent extra files or change the directory structure.
+- When a step extends an existing file, keep all existing code in it unchanged and add the new code.
+- Use only UTF-8. Never insert non-ASCII characters into .go files.
+- Keep code simple and correct for Go 1.22+. Do not leave unused imports or unused variables.
+- Module name is libratrack. Import paths: libratrack/internal/model, libratrack/internal/repository, libratrack/internal/handler, libratrack/internal/middleware.
+
+Task:
+In internal/repository/book_repository.go keep ErrNotFound and the BookRepository interface unchanged and add:
+
+1. An unexported struct inMemoryBookRepository with fields:
+   - mu sync.RWMutex
+   - books map[uint]*model.Book
+   - nextID uint (the next ID to assign, starts at 1)
+2. Method Create(book *model.Book) error
+   - take the write lock (mu.Lock with defer mu.Unlock)
+   - assign book.ID = nextID and increment nextID
+   - set CreatedAt and UpdatedAt of the book to time.Now()
+   - store a copy of the book in the map
+3. Method FindByID(id uint) (*model.Book, error)
+   - take the read lock (mu.RLock with defer mu.RUnlock)
+   - return a pointer to a copy of the stored book, or ErrNotFound if the ID is missing
+
+Use pointer receivers. Do not add a constructor yet. Do not implement the other methods yet.

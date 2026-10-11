@@ -1,0 +1,31 @@
+{
+  "model": "ollama_chat/gpt-oss:20b",
+  "edit_format": "whole",
+  "num_ctx": 16384,
+  "max_attempts": 3,
+  "always_build": false,
+  "steps": [
+    {
+      "step": "8.1",
+      "title": "docker-compose.yml для PostgreSQL",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 75.3,
+      "aider_secs": 73.2,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "8.2",
+      "title": ".env.example",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 157.3,
+      "aider_secs": 55.2,
+      "failed_check": "",
+      "detail": ""
+    }
+  ]
+}

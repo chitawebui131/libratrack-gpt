@@ -1,0 +1,22 @@
+General rules:
+- Output ONLY the exact file contents in the required Aider format (unless a step explicitly says otherwise, as the audit step does).
+- No explanations, no extra text, no markdown outside the code blocks (same exception).
+- Edit only the files named in the step. Do not invent extra files or change the directory structure.
+- When a step extends an existing file, keep all existing code in it unchanged and add the new code.
+- Use only UTF-8. Never insert non-ASCII characters into .go files.
+- Keep code simple and correct for Go 1.22+. Do not leave unused imports or unused variables.
+- Module name is libratrack. Import paths: libratrack/internal/model, libratrack/internal/repository, libratrack/internal/handler, libratrack/internal/middleware.
+
+Task:
+Create internal/repository/book_repository.go (package repository) containing only:
+
+1. A package-level error: var ErrNotFound = errors.New("book not found")
+2. The BookRepository interface with exactly these methods:
+   - Create(book *model.Book) error
+   - FindByID(id uint) (*model.Book, error)
+   - List(category string, page, limit int) ([]*model.Book, error)
+   - Update(book *model.Book) error
+   - Delete(id uint) error
+
+Import the model package as "libratrack/internal/model".
+Add a short comment to each method. For List: category may be empty (no filter), page starts at 1.
