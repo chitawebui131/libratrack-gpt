@@ -77,6 +77,18 @@
       "model": "ollama_chat/gemma4:26b",
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.7",
+      "title": "Модель User (лише для схеми)",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 219.6,
+      "aider_secs": 179.9,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }

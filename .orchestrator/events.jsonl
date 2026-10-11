@@ -36,3 +36,6 @@
 {"d": "2026-10-11", "t": "22:47:30", "kind": "step", "text": "[7/43] === step 8.7 [build]: Модель User (лише для схеми)"}
 {"d": "2026-10-11", "t": "22:50:30", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 180s"}
 {"d": "2026-10-11", "t": "22:51:09", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-11", "t": "22:51:09", "kind": "step", "text": "[8/43] === step 8.8 [build]: Міграція 000001, частина 1: categories, authors, books"}
+{"d": "2026-10-11", "t": "22:55:04", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 235s"}
+{"d": "2026-10-11", "t": "22:55:06", "kind": "pass", "text": "    PASS (attempt 1)"}
