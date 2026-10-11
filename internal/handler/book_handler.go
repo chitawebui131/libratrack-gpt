@@ -60,7 +60,7 @@ func (h *BookHandler) Create(c *gin.Context) {
 		Description:   req.Description,
 	}
 
-	if err := h.repo.Create(book); err != nil {
+	if err := h.repo.Create(&book); err != nil {
 		respondError(c, http.StatusInternalServerError, "internal_error", "could not create book", "")
 		return
 	}
