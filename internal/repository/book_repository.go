@@ -146,3 +146,14 @@ func (r *inMemoryBookRepository) Delete(id uint) error {
 	delete(r.books, id)
 	return nil
 }
+
+// compile-time assertion that inMemoryBookRepository implements BookRepository
+var _ BookRepository = (*inMemoryBookRepository)(nil)
+
+// NewInMemoryBookRepository creates a new in-memory book repository.
+func NewInMemoryBookRepository() BookRepository {
+	return &inMemoryBookRepository{
+		books:  make(map[uint]*model.Book),
+		nextID: 1,
+	}
+}
