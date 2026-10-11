@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"libratrack/internal/model"
 	"libratrack/internal/repository"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,4 +39,29 @@ func respondError(c *gin.Context, status int, code, message, details string) {
 			Details: details,
 		},
 	})
+}
+
+// Create handles the creation of a new book.
+func (h *BookHandler) Create(c *gin.Context) {
+	var req model.CreateBookRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid request body", err.Error())
+		return
+	}
+
+	book := model.Book{
+		Title:         req.Title,
+		ISBN:          req.ISBN,
+		Author:        req.Author,
+		Category:      req.Category,
+		PublishedYear: req.PublishedYear,
+		Description:   req.Description,
+	}
+
+	if err := h.repo.Create(book); err != nil {
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not create book", "")
+		return
+	}
+
+	c.JSON(http.StatusCreated, book)
 }
