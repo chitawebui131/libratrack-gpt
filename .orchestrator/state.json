@@ -50,5 +50,8 @@
       "last_failed": null
     }
   },
-  "queue": []
+  "queue": [],
+  "completed": [],
+  "last_failed": null,
+  "spec": "tema9.md"
 }
