@@ -1,0 +1,44 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). The ONLY allowed import is "time". Do NOT import gin, binding or validator.
+
+Create internal/model/copy.go (package model) with exactly these declarations and nothing else.
+
+1. type CopyStatus string
+2. A const block:
+   CopyStatusAvailable   CopyStatus = "available"
+   CopyStatusBorrowed    CopyStatus = "borrowed"
+   CopyStatusLost        CopyStatus = "lost"
+   CopyStatusUnderRepair CopyStatus = "under_repair"
+3. type Copy struct, one field per line:
+   ID          uint       `gorm:"primaryKey" json:"id"`
+   BookID      uint       `gorm:"not null;index" json:"book_id"`
+   InventoryNo string     `gorm:"size:50;not null;uniqueIndex" json:"inventory_no"`
+   Status      CopyStatus `gorm:"size:20;not null;default:available" json:"status"`
+   CreatedAt   time.Time  `json:"created_at"`
+   UpdatedAt   time.Time  `json:"updated_at"`
+4. type CreateCopyRequest struct:
+   InventoryNo string     `json:"inventory_no" binding:"required,max=50"`
+   Status      CopyStatus `json:"status" binding:"omitempty,oneof=available borrowed lost under_repair"`
+5. type BookAvailability struct:
+   BookID          uint `json:"book_id"`
+   TotalCopies     int  `json:"total_copies"`
+   AvailableCopies int  `json:"available_copies"`

@@ -30,3 +30,6 @@
 {"d": "2026-10-11", "t": "22:39:13", "kind": "step", "text": "[5/43] === step 8.5 [build]: Модель Category"}
 {"d": "2026-10-11", "t": "22:42:31", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 198s"}
 {"d": "2026-10-11", "t": "22:42:33", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-11", "t": "22:42:33", "kind": "step", "text": "[6/43] === step 8.6 [build]: Модель Copy і BookAvailability"}
+{"d": "2026-10-11", "t": "22:47:27", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 294s"}
+{"d": "2026-10-11", "t": "22:47:30", "kind": "pass", "text": "    PASS (attempt 1)"}
