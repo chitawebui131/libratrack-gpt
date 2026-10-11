@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"libratrack/internal/handler"
 )
 
 // @title Libratrack API
@@ -17,6 +18,13 @@ func main() {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+	// CRUD routes for books
+	router.GET("/api/v1/books", handler.GetBooks)
+	router.POST("/api/v1/books", handler.CreateBook)
+	router.GET("/api/v1/books/:id", handler.GetBook)
+	router.PUT("/api/v1/books/:id", handler.UpdateBook)
+	router.DELETE("/api/v1/books/:id", handler.DeleteBook)
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":8080")
 }
