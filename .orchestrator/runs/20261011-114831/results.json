@@ -92,6 +92,17 @@
       "aider_secs": 69.9,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.9",
+      "title": "Міграція 000001, частина 2: book_authors, copies, users, індекси",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 110.7,
+      "aider_secs": 108.2,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
