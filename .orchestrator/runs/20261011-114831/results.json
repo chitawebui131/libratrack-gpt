@@ -103,6 +103,28 @@
       "aider_secs": 108.2,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.10",
+      "title": "Міграція 000001: down",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 56.9,
+      "aider_secs": 54.6,
+      "failed_check": "",
+      "detail": ""
+    },
+    {
+      "step": "8.11",
+      "title": "Запуск міграцій (migrate.go)",
+      "level": "build",
+      "ok": false,
+      "attempts": 3,
+      "secs": 6555.4,
+      "aider_secs": 224.4,
+      "failed_check": "go vet ./...",
+      "detail": "CHECK FAILED: go vet ./...\ntimeout after 300s: go vet ./..."
     }
   ]
 }
