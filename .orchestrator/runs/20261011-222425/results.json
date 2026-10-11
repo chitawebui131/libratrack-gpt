@@ -89,6 +89,18 @@
       "model": "ollama_chat/gemma4:26b",
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.8",
+      "title": "Міграція 000001, частина 1: categories, authors, books",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 236.3,
+      "aider_secs": 234.5,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }

@@ -80,7 +80,8 @@
         "8.4",
         "8.5",
         "8.6",
-        "8.7"
+        "8.7",
+        "8.8"
       ],
       "last_failed": null,
       "info": {
@@ -132,6 +133,13 @@
           "model": "ollama_chat/gemma4:26b",
           "ok": true,
           "at": "2026-10-11T22:51:09"
+        },
+        "8.8": {
+          "attempts": 1,
+          "secs": 236.3,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": true,
+          "at": "2026-10-11T22:55:06"
         }
       }
     }
