@@ -59,6 +59,17 @@
       "aider_secs": 68.8,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.6",
+      "title": "Модель Copy і BookAvailability",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 98.3,
+      "aider_secs": 96.1,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
