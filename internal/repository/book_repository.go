@@ -112,3 +112,37 @@ func (r *inMemoryBookRepository) List(category string, page, limit int) ([]*mode
 
 	return all[start:end], nil
 }
+
+// Update modifies an existing book.
+func (r *inMemoryBookRepository) Update(book *model.Book) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	stored, ok := r.books[book.ID]
+	if !ok {
+		return ErrNotFound
+	}
+
+	// Preserve the original CreatedAt, update UpdatedAt.
+	book.CreatedAt = stored.CreatedAt
+	book.UpdatedAt = time.Now()
+
+	// Store a copy of the updated book.
+	copy := *book
+	r.books[book.ID] = &copy
+
+	return nil
+}
+
+// Delete removes a book by its ID.
+func (r *inMemoryBookRepository) Delete(id uint) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.books[id]; !ok {
+		return ErrNotFound
+	}
+
+	delete(r.books, id)
+	return nil
+}
