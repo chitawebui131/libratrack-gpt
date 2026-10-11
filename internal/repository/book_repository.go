@@ -2,6 +2,8 @@ package repository
 
 import (
 	"errors"
+	"sync"
+	"time"
 
 	"libratrack/internal/model"
 )
@@ -27,4 +29,45 @@ type BookRepository interface {
 
 	// Delete removes a book by its ID.
 	Delete(id uint) error
+}
+
+// inMemoryBookRepository is an in-memory implementation of BookRepository.
+type inMemoryBookRepository struct {
+	mu     sync.RWMutex
+	books  map[uint]*model.Book
+	nextID uint
+}
+
+// Create inserts a new book into the repository.
+func (r *inMemoryBookRepository) Create(book *model.Book) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	book.ID = r.nextID
+	r.nextID++
+
+	now := time.Now()
+	book.CreatedAt = now
+	book.UpdatedAt = now
+
+	// Store a copy of the book to avoid external mutation.
+	copy := *book
+	r.books[book.ID] = &copy
+
+	return nil
+}
+
+// FindByID retrieves a book by its ID.
+func (r *inMemoryBookRepository) FindByID(id uint) (*model.Book, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	stored, ok := r.books[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+
+	// Return a copy to prevent external mutation.
+	copy := *stored
+	return &copy, nil
 }
