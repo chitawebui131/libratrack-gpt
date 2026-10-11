@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"sort"
 	"sync"
 	"time"
 
@@ -70,4 +71,44 @@ func (r *inMemoryBookRepository) FindByID(id uint) (*model.Book, error) {
 	// Return a copy to prevent external mutation.
 	copy := *stored
 	return &copy, nil
+}
+
+// List returns a paginated list of books filtered by category.
+func (r *inMemoryBookRepository) List(category string, page, limit int) ([]*model.Book, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	// Collect copies of all stored books, applying category filter if needed.
+	var all []*model.Book
+	for _, book := range r.books {
+		if category == "" || book.Category == category {
+			copy := *book
+			all = append(all, &copy)
+		}
+	}
+
+	// Sort by ID ascending.
+	sort.Slice(all, func(i, j int) bool {
+		return all[i].ID < all[j].ID
+	})
+
+	// Pagination defaults.
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 20
+	}
+
+	start := (page - 1) * limit
+	if start >= len(all) {
+		return []*model.Book{}, nil
+	}
+
+	end := start + limit
+	if end > len(all) {
+		end = len(all)
+	}
+
+	return all[start:end], nil
 }
