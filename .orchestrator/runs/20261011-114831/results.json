@@ -48,6 +48,17 @@
       "aider_secs": 130.6,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.5",
+      "title": "Модель Category",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 71.3,
+      "aider_secs": 68.8,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
