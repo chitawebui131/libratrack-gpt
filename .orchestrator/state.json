@@ -9,9 +9,10 @@
     "8.7",
     "8.8",
     "8.9",
-    "8.10"
+    "8.10",
+    "8.11"
   ],
   "last_failed": null,
   "spec": "tema8_small.md",
-  "model": "ollama_chat/gpt-oss:20b"
+  "model": "ollama_chat/gemma4-e4b"
 }
