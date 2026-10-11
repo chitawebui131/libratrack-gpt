@@ -3,10 +3,11 @@ package main
 import (
 	_ "libratrack/docs"
 
+	"libratrack/internal/handler"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"libratrack/internal/handler"
 )
 
 // @title Libratrack API
