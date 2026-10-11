@@ -51,7 +51,9 @@
     }
   },
   "queue": [],
-  "completed": [],
+  "completed": [
+    "10.1"
+  ],
   "last_failed": null,
   "spec": "tema10.md"
 }
