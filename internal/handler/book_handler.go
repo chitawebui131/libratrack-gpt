@@ -173,3 +173,22 @@ func (h *BookHandler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, book)
 }
+
+// Delete handles deleting an existing book.
+func (h *BookHandler) Delete(c *gin.Context) {
+	id, ok := parseID(c)
+	if !ok {
+		return
+	}
+
+	if err := h.repo.Delete(id); err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
+			return
+		}
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not delete book", "")
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
