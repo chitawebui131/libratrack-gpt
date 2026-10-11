@@ -37,6 +37,17 @@
       "aider_secs": 106.5,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.4",
+      "title": "Модель Author",
+      "level": "build",
+      "ok": true,
+      "attempts": 2,
+      "secs": 543.3,
+      "aider_secs": 130.6,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
