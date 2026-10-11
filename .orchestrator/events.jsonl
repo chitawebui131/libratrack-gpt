@@ -42,3 +42,6 @@
 {"d": "2026-10-11", "t": "22:55:06", "kind": "step", "text": "[9/43] === step 8.9 [build]: Міграція 000001, частина 2: book_authors, copies, users, індекси"}
 {"d": "2026-10-11", "t": "22:58:54", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 228s"}
 {"d": "2026-10-11", "t": "22:58:56", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-11", "t": "22:58:56", "kind": "step", "text": "[10/43] === step 8.10 [build]: Міграція 000001: down"}
+{"d": "2026-10-11", "t": "23:02:11", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 195s"}
+{"d": "2026-10-11", "t": "23:02:12", "kind": "pass", "text": "    PASS (attempt 1)"}
