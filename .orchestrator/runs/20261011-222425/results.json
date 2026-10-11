@@ -41,6 +41,18 @@
       "model": "ollama_chat/gemma4:26b",
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.4",
+      "title": "Модель Author",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 182.0,
+      "aider_secs": 180.1,
+      "model": "ollama_chat/gemma4:26b",
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
