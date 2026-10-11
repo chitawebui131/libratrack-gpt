@@ -99,3 +99,35 @@ func (h *BookHandler) GetByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, book)
 }
+
+// List retrieves a paginated list of books, optionally filtered by category.
+func (h *BookHandler) List(c *gin.Context) {
+	category := c.Query("category")
+
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "20")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid pagination", "")
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid pagination", "")
+		return
+	}
+
+	if limit > 100 {
+		limit = 100
+	}
+
+	books, err := h.repo.List(category, page, limit)
+	if err != nil {
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not list books", "")
+		return
+	}
+
+	c.JSON(http.StatusOK, books)
+}
