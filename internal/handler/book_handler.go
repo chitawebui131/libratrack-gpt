@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"libratrack/internal/model"
 	"libratrack/internal/repository"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -64,4 +66,36 @@ func (h *BookHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, book)
+}
+
+// parseID reads the "id" path parameter, validates it, and returns the parsed uint ID.
+// If the ID is invalid or zero, it responds with a 422 error and returns 0, false.
+func parseID(c *gin.Context) (uint, bool) {
+	idStr := c.Param("id")
+	id64, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil || id64 == 0 {
+		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid id", "")
+		return 0, false
+	}
+	return uint(id64), true
+}
+
+// GetByID retrieves a book by its ID.
+func (h *BookHandler) GetByID(c *gin.Context) {
+	id, ok := parseID(c)
+	if !ok {
+		return
+	}
+
+	book, err := h.repo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
+			return
+		}
+		respondError(c, http.StatusInternalServerError, "internal_error", "could not load book", "")
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
 }
