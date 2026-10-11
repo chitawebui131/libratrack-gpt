@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"libratrack/internal/repository"
+
+	"github.com/gin-gonic/gin"
 )
 
 // BookHandler handles book-related HTTP requests.
