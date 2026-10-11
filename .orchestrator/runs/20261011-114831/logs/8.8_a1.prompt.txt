@@ -1,0 +1,52 @@
+General rules:
+- Output the complete content of every file (whole file); never output a diff.
+- Do not add imports that are not used; do not import gin, binding or validator in internal/model.
+- Do not create files that were not requested; do not rename existing functions or types.
+- Use only ASCII characters in .go files.
+- If a requested file already exists, keep everything not mentioned in the task unchanged.
+
+**Про збірку (`go build ./...` після кожного кроку):**
+- Кроки 8.1-8.14 залишають проєкт компільованим.
+- Кроки **8.15-8.22 — «вікно», де збірка падає** (інтерфейс BookRepository оголошено раніше, ніж реалізовано всі його методи, а старий main.go ще посилається на видалений репозиторій). Це очікувано: у вікні натискай Enter. Після кроку **8.22** збірка знову має бути зеленою.
+- Після кроків 8.24-8.31 збірка також має проходити, окрім випадків, зазначених у «Перевір сам».
+
+**Перед стартом (робить студент, не агент):**
+- Проєкт з теми 7 збирається, тести проходять, закомічено стан теми 7 (`git tag theme-7`).
+- Docker Desktop (або docker + docker compose) встановлений.
+- Залежності ставимо вручну, не через Aider (він не вміє `go get`): `go get gorm.io/gorm gorm.io/driver/postgres github.com/jackc/pgx/v5 github.com/golang-migrate/migrate/v4 github.com/golang-migrate/migrate/v4/database/postgres github.com/golang-migrate/migrate/v4/source/file`. Не запускай `go mod tidy` до кінця теми (він видалить пакети, які ще ніде не імпортуються).
+
+**Рішення студента перед запуском (за бажанням, значення за замовчуванням уже в промптах):** назва БД і користувача (`libratrack`), порт 5432, дані для seed (кроки 8.32-8.35), розмір сторінки за замовчуванням (20, максимум 100).
+
+Task:
+RULES: Output the COMPLETE content of the file below (whole file, never a diff, no explanations). This is a plain SQL file (PostgreSQL), no Go code.
+
+Create migrations/000001_init_schema.up.sql with exactly these three tables, in this order, one column per line:
+
+CREATE TABLE categories (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE authors (
+  id BIGSERIAL PRIMARY KEY,
+  full_name VARCHAR(255) NOT NULL,
+  bio TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE books (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  isbn VARCHAR(20) NOT NULL UNIQUE,
+  category_id BIGINT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+  publisher VARCHAR(255) NOT NULL DEFAULT '',
+  published_year INT NOT NULL DEFAULT 0,
+  description TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+Do not add anything else to the file.

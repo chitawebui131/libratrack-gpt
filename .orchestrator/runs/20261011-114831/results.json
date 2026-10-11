@@ -70,6 +70,17 @@
       "aider_secs": 96.1,
       "failed_check": "",
       "detail": ""
+    },
+    {
+      "step": "8.7",
+      "title": "Модель User (лише для схеми)",
+      "level": "build",
+      "ok": true,
+      "attempts": 1,
+      "secs": 67.2,
+      "aider_secs": 64.8,
+      "failed_check": "",
+      "detail": ""
     }
   ]
 }
