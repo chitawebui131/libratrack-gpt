@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,23 @@ func RecoveryMiddleware() gin.HandlerFunc {
 				})
 			}
 		}()
+		c.Next()
+	}
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
+	if allowedOrigin == "" {
+		allowedOrigin = "*"
+	}
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", allowedOrigin)
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
 		c.Next()
 	}
 }
