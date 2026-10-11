@@ -53,7 +53,8 @@
   "queue": [],
   "completed": [
     "10.1",
-    "10.2"
+    "10.2",
+    "10.3"
   ],
   "last_failed": null,
   "spec": "tema10.md"
