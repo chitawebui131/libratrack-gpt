@@ -7,10 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"libratrack/internal/model"
 	"libratrack/internal/repository"
-
-	"github.com/gin-gonic/gin"
 )
 
 type fakeBookRepo struct {
@@ -39,6 +38,10 @@ func (f *fakeBookRepo) Update(book *model.Book, authorIDs []uint) error {
 	return nil
 }
 
+func (f *fakeBookRepo) GetCategoryByName(name string) (*model.Category, error) {
+	return nil, nil
+}
+
 func newTestRouter(repo repository.BookRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -61,18 +64,18 @@ func TestCreateBook201(t *testing.T) {
 	body := bytes.NewBufferString(`{"title":"T","isbn":"1234567890","category_id":1,"author_ids":[1]}`)
 	req, _ := http.NewRequest("POST", "/books", body)
 	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusCreated {
-		t.Errorf("Expected status code 201, got %d", rec.Code)
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected status code 201, got %d", w.Code)
 	}
 
 	var response struct {
 		ID uint `json:"id"`
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
 	}
 
@@ -88,18 +91,18 @@ func TestCreateBookValidation422(t *testing.T) {
 	body := bytes.NewBufferString(`{"isbn":"1234567890"}`)
 	req, _ := http.NewRequest("POST", "/books", body)
 	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusUnprocessableEntity {
-		t.Errorf("Expected status code 422, got %d", rec.Code)
+	if w.Code != http.StatusUnprocessableEntity {
+		t.Errorf("Expected status code 422, got %d", w.Code)
 	}
 
 	var response struct {
 		Code string `json:"error.code"`
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
 	}
 
@@ -119,18 +122,18 @@ func TestCreateBookConflict409(t *testing.T) {
 	body := bytes.NewBufferString(`{"title":"T","isbn":"1234567890","category_id":1,"author_ids":[1]}`)
 	req, _ := http.NewRequest("POST", "/books", body)
 	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusConflict {
-		t.Errorf("Expected status code 409, got %d", rec.Code)
+	if w.Code != http.StatusConflict {
+		t.Errorf("Expected status code 409, got %d", w.Code)
 	}
 
 	var response struct {
 		Code string `json:"error.code"`
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
 	}
 
@@ -148,18 +151,18 @@ func TestGetBookNotFound404(t *testing.T) {
 	r := newTestRouter(repo)
 
 	req, _ := http.NewRequest("GET", "/books/1", nil)
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusNotFound {
-		t.Errorf("Expected status code 404, got %d", rec.Code)
+	if w.Code != http.StatusNotFound {
+		t.Errorf("Expected status code 404, got %d", w.Code)
 	}
 
 	var response struct {
 		Code string `json:"error.code"`
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
 	}
 
@@ -173,18 +176,18 @@ func TestGetBookInvalidID400(t *testing.T) {
 	r := newTestRouter(repo)
 
 	req, _ := http.NewRequest("GET", "/books/abc", nil)
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Errorf("Expected status code 400, got %d", rec.Code)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code 400, got %d", w.Code)
 	}
 
 	var response struct {
 		Code string `json:"error.code"`
 	}
-	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Errorf("Failed to unmarshal response body: %v", err)
 	}
 
@@ -202,11 +205,11 @@ func TestDeleteBook204(t *testing.T) {
 	r := newTestRouter(repo)
 
 	req, _ := http.NewRequest("DELETE", "/books/1", nil)
-	rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-	if rec.Code != http.StatusNoContent {
-		t.Errorf("Expected status code 204, got %d", rec.Code)
+	if w.Code != http.StatusNoContent {
+		t.Errorf("Expected status code 204, got %d", w.Code)
 	}
 }
