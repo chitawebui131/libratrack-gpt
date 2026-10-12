@@ -4,242 +4,169 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
+
 	"libratrack/internal/model"
-	"libratrack/internal/repository/testhelper"
+	"libratrack/testhelper"
 )
 
 func TestCopyCreateAndList(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
-	// Create category and author for the book
-	category := model.Category{
-		Name: "Fiction",
-	}
-	testhelper.CreateCategory(t, db, &category)
-
-	author := model.Author{
-		FirstName: "John",
-		LastName:  "Doe",
-	}
-	testhelper.CreateAuthor(t, db, &author)
-
-	// Create a book
+	// Setup: create category, author and book
+	category := model.Category{Name: "Fiction"}
+	db.Create(&category)
+	author := model.Author{Name: "John Doe"}
+	db.Create(&author)
 	book := model.Book{
 		Title:       "Test Book",
-		Description: "A test book",
 		CategoryID:  category.ID,
-		Authors:     []model.Author{author},
+		AuthorID:    author.ID,
+		Description: "Test description",
 	}
-	testhelper.CreateBook(t, db, &book)
+	db.Create(&book)
 
-	// Create two copies
-	copy1 := model.Copy{
-		BookID:      book.ID,
-		InventoryNo: "INV-001",
-		Status:      "", // Empty status should default to "available"
-	}
+	// Create copies
 	copyRepo := NewCopyRepository(db)
-	createdCopy1, err := copyRepo.Create(copy1)
-	if err != nil {
-		t.Fatalf("Failed to create first copy: %v", err)
-	}
+	copy1, err := copyRepo.Create(model.Copy{
+		BookID:       book.ID,
+		InventoryNo:  "INV001",
+		Status:       "",
+		Location:     "Shelf A",
+		Acquisition:  "Purchase",
+		Condition:    "Good",
+		Notes:        "Test note 1",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, model.CopyStatusAvailable, copy1.Status)
 
-	// Check that the first copy got the status "available" automatically
-	if createdCopy1.Status != model.CopyStatusAvailable {
-		t.Errorf("Expected first copy status to be %s, got %s", model.CopyStatusAvailable, createdCopy1.Status)
-	}
-
-	copy2 := model.Copy{
+	copy2, err := copyRepo.Create(model.Copy{
 		BookID:      book.ID,
-		InventoryNo: "INV-002",
+		InventoryNo: "INV002",
 		Status:      model.CopyStatusLost,
-	}
-	createdCopy2, err := copyRepo.Create(copy2)
-	if err != nil {
-		t.Fatalf("Failed to create second copy: %v", err)
-	}
+		Location:    "Shelf B",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, model.CopyStatusLost, copy2.Status)
 
-	// Check that the second copy has the correct status
-	if createdCopy2.Status != model.CopyStatusLost {
-		t.Errorf("Expected second copy status to be %s, got %s", model.CopyStatusLost, createdCopy2.Status)
-	}
-
-	// List copies by book
+	// List copies
 	copies, err := copyRepo.ListByBook(book.ID)
-	if err != nil {
-		t.Fatalf("Failed to list copies: %v", err)
-	}
-
-	if len(copies) != 2 {
-		t.Errorf("Expected 2 copies, got %d", len(copies))
-	}
+	assert.NoError(t, err)
+	assert.Len(t, copies, 2)
+	assert.Contains(t, copies, *copy1)
+	assert.Contains(t, copies, *copy2)
 }
 
 func TestCopyCreateUnknownBook(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
 	copyRepo := NewCopyRepository(db)
-	copy := model.Copy{
-		BookID:      9999, // Non-existent book ID
-		InventoryNo: "INV-001",
-	}
-	_, err := copyRepo.Create(copy)
-	if !errors.Is(err, model.ErrNotFound) {
-		t.Errorf("Expected ErrNotFound, got %v", err)
-	}
+	_, err := copyRepo.Create(model.Copy{
+		BookID:      9999,
+		InventoryNo: "INV001",
+	})
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
 
 func TestCopyDuplicateInventoryNo(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
-	// Create category and author for the book
-	category := model.Category{
-		Name: "Fiction",
-	}
-	testhelper.CreateCategory(t, db, &category)
-
-	author := model.Author{
-		FirstName: "John",
-		LastName:  "Doe",
-	}
-	testhelper.CreateAuthor(t, db, &author)
-
-	// Create a book
+	// Setup: create category, author and book
+	category := model.Category{Name: "Fiction"}
+	db.Create(&category)
+	author := model.Author{Name: "John Doe"}
+	db.Create(&author)
 	book := model.Book{
 		Title:       "Test Book",
-		Description: "A test book",
 		CategoryID:  category.ID,
-		Authors:     []model.Author{author},
+		AuthorID:    author.ID,
+		Description: "Test description",
 	}
-	testhelper.CreateBook(t, db, &book)
+	db.Create(&book)
 
 	// Create first copy
 	copyRepo := NewCopyRepository(db)
-	firstCopy := model.Copy{
+	_, err := copyRepo.Create(model.Copy{
 		BookID:      book.ID,
-		InventoryNo: "INV-001",
-	}
-	_, err := copyRepo.Create(firstCopy)
-	if err != nil {
-		t.Fatalf("Failed to create first copy: %v", err)
-	}
+		InventoryNo: "INV001",
+	})
+	assert.NoError(t, err)
 
-	// Try to create a second copy with the same inventory number
-	secondCopy := model.Copy{
+	// Try to create second copy with same inventory number
+	_, err = copyRepo.Create(model.Copy{
 		BookID:      book.ID,
-		InventoryNo: "INV-001",
-	}
-	_, err = copyRepo.Create(secondCopy)
-	if !errors.Is(err, model.ErrConflict) {
-		t.Errorf("Expected ErrConflict for duplicate inventory number, got %v", err)
-	}
+		InventoryNo: "INV001",
+	})
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrDuplicatedKey))
 }
 
 func TestAvailability(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
-	// Create category and author for the book
-	category := model.Category{
-		Name: "Fiction",
-	}
-	testhelper.CreateCategory(t, db, &category)
-
-	author := model.Author{
-		FirstName: "John",
-		LastName:  "Doe",
-	}
-	testhelper.CreateAuthor(t, db, &author)
-
-	// Create a book
+	// Setup: create category, author and book
+	category := model.Category{Name: "Fiction"}
+	db.Create(&category)
+	author := model.Author{Name: "John Doe"}
+	db.Create(&author)
 	book := model.Book{
 		Title:       "Test Book",
-		Description: "A test book",
 		CategoryID:  category.ID,
-		Authors:     []model.Author{author},
+		AuthorID:    author.ID,
+		Description: "Test description",
 	}
-	testhelper.CreateBook(t, db, &book)
+	db.Create(&book)
 
-	// Create 4 copies with different statuses
+	// Create copies with different statuses
 	copyRepo := NewCopyRepository(db)
-	copies := []model.Copy{
-		{BookID: book.ID, InventoryNo: "INV-001", Status: model.CopyStatusAvailable},
-		{BookID: book.ID, InventoryNo: "INV-002", Status: model.CopyStatusAvailable},
-		{BookID: book.ID, InventoryNo: "INV-003", Status: model.CopyStatusBorrowed},
-		{BookID: book.ID, InventoryNo: "INV-004", Status: model.CopyStatusLost},
-	}
-	for _, c := range copies {
-		_, err := copyRepo.Create(c)
-		if err != nil {
-			t.Fatalf("Failed to create copy: %v", err)
-		}
-	}
+	copy1, _ := copyRepo.Create(model.Copy{BookID: book.ID, InventoryNo: "INV001", Status: model.CopyStatusAvailable})
+	copy2, _ := copyRepo.Create(model.Copy{BookID: book.ID, InventoryNo: "INV002", Status: model.CopyStatusAvailable})
+	copy3, _ := copyRepo.Create(model.Copy{BookID: book.ID, InventoryNo: "INV003", Status: model.CopyStatusBorrowed})
+	copy4, _ := copyRepo.Create(model.Copy{BookID: book.ID, InventoryNo: "INV004", Status: model.CopyStatusLost})
 
 	// Test availability
 	availability, err := copyRepo.Availability(book.ID)
-	if err != nil {
-		t.Fatalf("Failed to get availability: %v", err)
-	}
-
-	if availability.TotalCopies != 4 {
-		t.Errorf("Expected TotalCopies to be 4, got %d", availability.TotalCopies)
-	}
-
-	if availability.AvailableCopies != 2 {
-		t.Errorf("Expected AvailableCopies to be 2, got %d", availability.AvailableCopies)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 4, availability.TotalCopies)
+	assert.Equal(t, 2, availability.AvailableCopies)
 }
 
 func TestAvailabilityNoCopies(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
-	// Create category and author for the book
-	category := model.Category{
-		Name: "Fiction",
-	}
-	testhelper.CreateCategory(t, db, &category)
-
-	author := model.Author{
-		FirstName: "John",
-		LastName:  "Doe",
-	}
-	testhelper.CreateAuthor(t, db, &author)
-
-	// Create a book
+	// Setup: create category, author and book
+	category := model.Category{Name: "Fiction"}
+	db.Create(&category)
+	author := model.Author{Name: "John Doe"}
+	db.Create(&author)
 	book := model.Book{
 		Title:       "Test Book",
-		Description: "A test book",
 		CategoryID:  category.ID,
-		Authors:     []model.Author{author},
+		AuthorID:    author.ID,
+		Description: "Test description",
 	}
-	testhelper.CreateBook(t, db, &book)
+	db.Create(&book)
 
-	// Test availability for book with no copies
+	copyRepo := NewCopyRepository(db)
 	availability, err := copyRepo.Availability(book.ID)
-	if err != nil {
-		t.Fatalf("Failed to get availability: %v", err)
-	}
-
-	if availability.TotalCopies != 0 {
-		t.Errorf("Expected TotalCopies to be 0, got %d", availability.TotalCopies)
-	}
-
-	if availability.AvailableCopies != 0 {
-		t.Errorf("Expected AvailableCopies to be 0, got %d", availability.AvailableCopies)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 0, availability.TotalCopies)
+	assert.Equal(t, 0, availability.AvailableCopies)
 }
 
 func TestAvailabilityUnknownBook(t *testing.T) {
 	db := testhelper.SetupTestDB(t)
-	defer testhelper.TeardownTestDB(db)
+	defer testhelper.TeardownTestDB(t, db)
 
 	copyRepo := NewCopyRepository(db)
-	_, err := copyRepo.Availability(9999) // Non-existent book ID
-	if !errors.Is(err, model.ErrNotFound) {
-		t.Errorf("Expected ErrNotFound, got %v", err)
-	}
+	_, err := copyRepo.Availability(9999)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
