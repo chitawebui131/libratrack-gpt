@@ -22,14 +22,14 @@ func TestCopyCreateAndList(t *testing.T) {
 
 	// Create two copies
 	copy1 := model.Copy{
-		BookID: bookID,
+		BookID:      bookID,
 		InventoryNo: "INV001",
-		Status: "", // Empty status should default to "available"
+		Status:      "", // Empty status should default to "available"
 	}
 	copy2 := model.Copy{
-		BookID: bookID,
+		BookID:      bookID,
 		InventoryNo: "INV002",
-		Status: "lost",
+		Status:      "lost",
 	}
 
 	// Create copy 1
@@ -62,9 +62,9 @@ func TestCopyCreateUnknownBook(t *testing.T) {
 	repo := NewCopyRepository(db)
 
 	copy := model.Copy{
-		BookID: 9999, // Unknown BookID
+		BookID:      9999, // Unknown BookID
 		InventoryNo: "INV9999",
-		Status: "",
+		Status:      "",
 	}
 
 	err := repo.Create(&copy)
@@ -84,9 +84,9 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 
 	// First copy
 	copy1 := model.Copy{
-		BookID: bookID,
+		BookID:      bookID,
 		InventoryNo: "INV001",
-		Status: "",
+		Status:      "",
 	}
 	err1 := repo.Create(&copy1)
 	if err1 != nil {
@@ -95,9 +95,9 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 
 	// Second copy with same InventoryNo
 	copy2 := model.Copy{
-		BookID: bookID,
+		BookID:      bookID,
 		InventoryNo: "INV001",
-		Status: "lost",
+		Status:      "lost",
 	}
 
 	err2 := repo.Create(&copy2)
