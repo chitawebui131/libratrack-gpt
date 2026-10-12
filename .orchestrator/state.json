@@ -95,7 +95,8 @@
         "8.19",
         "8.20",
         "8.21",
-        "8.22"
+        "8.22",
+        "8.23"
       ],
       "last_failed": null,
       "info": {
@@ -252,6 +253,13 @@
           "model": "ollama_chat/gpt-oss:20b",
           "ok": true,
           "at": "2026-10-12T06:22:03"
+        },
+        "8.23": {
+          "attempts": 1,
+          "secs": 125.4,
+          "model": "ollama_chat/gpt-oss:20b",
+          "ok": true,
+          "at": "2026-10-12T06:24:09"
         }
       }
     }
