@@ -8,7 +8,7 @@ import (
 )
 
 func TestCopyCreateAndList(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	cat := createCategory(db, "Cat")
 	auth := createAuthor(db, "Auth")
 	book := createBook(db, "Book", auth.ID, cat.ID)
@@ -39,7 +39,7 @@ func TestCopyCreateAndList(t *testing.T) {
 }
 
 func TestCopyCreateUnknownBook(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 	c := &model.Copy{BookID: 9999, InventoryNo: "X"}
 	err := repo.Create(c)
@@ -49,7 +49,7 @@ func TestCopyCreateUnknownBook(t *testing.T) {
 }
 
 func TestCopyDuplicateInventoryNo(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	cat := createCategory(db, "Cat")
 	auth := createAuthor(db, "Auth")
 	book := createBook(db, "Book", auth.ID, cat.ID)
@@ -69,7 +69,7 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 }
 
 func TestAvailability(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	cat := createCategory(db, "Cat")
 	auth := createAuthor(db, "Auth")
 	book := createBook(db, "Book", auth.ID, cat.ID)
@@ -90,7 +90,7 @@ func TestAvailability(t *testing.T) {
 }
 
 func TestAvailabilityNoCopies(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	cat := createCategory(db, "Cat")
 	auth := createAuthor(db, "Auth")
 	book := createBook(db, "Book", auth.ID, cat.ID)
@@ -106,7 +106,7 @@ func TestAvailabilityNoCopies(t *testing.T) {
 }
 
 func TestAvailabilityUnknownBook(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 	_, err := repo.Availability(9999)
 	if !errors.Is(err, model.ErrNotFound) {
