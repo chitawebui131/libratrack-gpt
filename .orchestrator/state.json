@@ -82,9 +82,16 @@
         "8.6",
         "8.7",
         "8.8",
-        "8.9"
+        "8.9",
+        "8.10"
       ],
-      "last_failed": null,
+      "last_failed": {
+        "step": "8.11",
+        "check": "aider",
+        "model": "ollama_chat/gemma4:26b",
+        "at": "2026-10-12T04:22:03",
+        "detail": "aider exited with code 124:\nTIMEOUT after 900s"
+      },
       "info": {
         "8.1": {
           "attempts": 1,
@@ -148,6 +155,20 @@
           "model": "ollama_chat/gemma4:26b",
           "ok": true,
           "at": "2026-10-11T22:58:56"
+        },
+        "8.10": {
+          "attempts": 1,
+          "secs": 196.5,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": true,
+          "at": "2026-10-11T23:02:12"
+        },
+        "8.11": {
+          "attempts": 3,
+          "secs": 19190.6,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": false,
+          "at": "2026-10-12T04:22:03"
         }
       }
     }
