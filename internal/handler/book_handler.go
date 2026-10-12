@@ -32,17 +32,6 @@ type ErrorResponse struct {
 	Error ErrorBody `json:"error"`
 }
 
-// respondError sends an error response with the given status and details.
-func respondError(c *gin.Context, status int, code, message, details string) {
-	c.AbortWithStatusJSON(status, ErrorResponse{
-		Error: ErrorBody{
-			Code:    code,
-			Message: message,
-			Details: details,
-		},
-	})
-}
-
 // Create handles the creation of a new book.
 func (h *BookHandler) Create(c *gin.Context) {
 	var req model.CreateBookRequest
@@ -66,18 +55,6 @@ func (h *BookHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, book)
-}
-
-// parseID reads the "id" path parameter, validates it, and returns the parsed uint ID.
-// If the ID is invalid or zero, it responds with a 422 error and returns 0, false.
-func parseID(c *gin.Context) (uint, bool) {
-	idStr := c.Param("id")
-	id64, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil || id64 == 0 {
-		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid id", "")
-		return 0, false
-	}
-	return uint(id64), true
 }
 
 // GetByID retrieves a book by its ID.
