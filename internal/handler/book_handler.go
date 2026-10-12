@@ -60,7 +60,7 @@ func (h *BookHandler) Create(c *gin.Context) {
 		Description:   req.Description,
 	}
 
-	if err := h.repo.Create(&book); err != nil {
+	if err := h.repo.Create(&book, req.AuthorIDs); err != nil {
 		respondError(c, http.StatusInternalServerError, "internal_error", "could not create book", "")
 		return
 	}
@@ -123,7 +123,22 @@ func (h *BookHandler) List(c *gin.Context) {
 		limit = 100
 	}
 
-	books, err := h.repo.List(category, page, limit)
+	var categoryID uint
+	if category != "" {
+		cat, err := h.repo.GetCategoryByName(category)
+		if err != nil {
+			if errors.Is(err, repository.ErrNotFound) {
+				// No such category; return empty list
+				c.JSON(http.StatusOK, []model.Book{})
+				return
+			}
+			respondError(c, http.StatusInternalServerError, "internal_error", "could not retrieve category", "")
+			return
+		}
+		categoryID = cat.ID
+	}
+
+	books, err := h.repo.List(categoryID, page, limit)
 	if err != nil {
 		respondError(c, http.StatusInternalServerError, "internal_error", "could not list books", "")
 		return
@@ -161,7 +176,7 @@ func (h *BookHandler) Update(c *gin.Context) {
 	book.PublishedYear = req.PublishedYear
 	book.Description = req.Description
 
-	if err := h.repo.Update(book); err != nil {
+	if err := h.repo.Update(book, req.AuthorIDs); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
 			return
