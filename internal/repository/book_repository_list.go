@@ -2,6 +2,7 @@ package repository
 
 import "libratrack/internal/model"
 
+// List returns a paginated list of books, optionally filtered by category ID.
 func (r *gormBookRepository) List(categoryID uint, page, limit int) ([]model.Book, error) {
 	if page < 1 {
 		page = 1

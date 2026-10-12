@@ -87,19 +87,6 @@ func (r *gormBookRepository) FindByID(id uint) (*model.Book, error) {
 	return &b, nil
 }
 
-// List returns a paginated list of books, optionally filtered by category ID.
-func (r *gormBookRepository) List(categoryID uint, page, limit int) ([]model.Book, error) {
-	var books []model.Book
-	query := r.db.Preload("Authors").Preload("Category").Preload("Copies")
-	if categoryID != 0 {
-		query = query.Where("category_id = ?", categoryID)
-	}
-	if err := query.Offset((page - 1) * limit).Limit(limit).Find(&books).Error; err != nil {
-		return nil, translateError(err)
-	}
-	return books, nil
-}
-
 // Update modifies an existing book and its author associations.
 func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
