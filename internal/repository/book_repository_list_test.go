@@ -1,8 +1,6 @@
 package repository
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestBookListByCategory(t *testing.T) {
 	db := setupTestDB(t)
@@ -41,3 +39,24 @@ func TestBookListByCategory(t *testing.T) {
 	}
 	if len(booksB) != 2 {
 		t.Fatalf("expected 2 books in category B, got %d", len(booksB))
+	}
+
+	// List all books
+	booksAll, err := repo.List(0, 1, 20)
+	if err != nil {
+		t.Fatalf("List for all books returned error: %v", err)
+	}
+	if len(booksAll) != 5 {
+		t.Fatalf("expected 5 books in total, got %d", len(booksAll))
+	}
+}
+
+func TestBookListPagination(t *testing.T) {
+	db := setupTestDB(t)
+
+	// Create a category and an author
+	cat := mustCategory(t, db, "Cat")
+	author := mustAuthor(t, db, "Author One")
+
+	// Create five books in the same category
+	mustBook(t, db, "Book 1", "ISBN-1", cat.ID
