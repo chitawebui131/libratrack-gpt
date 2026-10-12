@@ -130,3 +130,6 @@
 {"d": "2026-10-12", "t": "06:14:12", "kind": "step", "text": "[9/30] === step 8.22 [build]: main.go: БД, міграції, маршрути книг"}
 {"d": "2026-10-12", "t": "06:21:58", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 466s"}
 {"d": "2026-10-12", "t": "06:22:03", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-12", "t": "06:22:03", "kind": "step", "text": "[10/30] === step 8.23 [build]: Виправлення N+1 (List з Preload)"}
+{"d": "2026-10-12", "t": "06:24:06", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 123s"}
+{"d": "2026-10-12", "t": "06:24:09", "kind": "pass", "text": "    PASS (attempt 1)"}
