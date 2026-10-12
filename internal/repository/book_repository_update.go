@@ -6,7 +6,6 @@ import (
 	"libratrack/internal/model"
 )
 
-// Update modifies an existing book and its author associations.
 func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		authors, err := loadAuthors(tx, authorIDs)
@@ -44,7 +43,6 @@ func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
 	return nil
 }
 
-// Delete removes a book by its ID.
 func (r *gormBookRepository) Delete(id uint) error {
 	res := r.db.Delete(&model.Book{}, id)
 	if res.Error != nil {

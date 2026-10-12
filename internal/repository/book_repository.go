@@ -87,47 +87,6 @@ func (r *gormBookRepository) FindByID(id uint) (*model.Book, error) {
 	return &b, nil
 }
 
-// Update modifies an existing book and its author associations.
-func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		authors, err := loadAuthors(tx, authorIDs)
-		if err != nil {
-			return err
-		}
-		if err := tx.Model(book).Updates(map[string]interface{}{
-			"Title":         book.Title,
-			"ISBN":          book.ISBN,
-			"CategoryID":    book.CategoryID,
-			"Publisher":     book.Publisher,
-			"PublishedYear": book.PublishedYear,
-			"Description":   book.Description,
-		}).Error; err != nil {
-			return err
-		}
-		if err := tx.Model(book).Association("Authors").Replace(authors); err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return translateError(err)
-	}
-	var fresh model.Book
-	if err := r.db.Preload("Authors").Preload("Category").First(&fresh, book.ID).Error; err != nil {
-		return translateError(err)
-	}
-	*book = fresh
-	return nil
-}
-
-// Delete removes a book by its ID.
-func (r *gormBookRepository) Delete(id uint) error {
-	if err := r.db.Delete(&model.Book{}, id).Error; err != nil {
-		return translateError(err)
-	}
-	return nil
-}
-
 // GetCategoryByName retrieves a category by its name.
 func (r *gormBookRepository) GetCategoryByName(name string) (*model.Category, error) {
 	var cat model.Category
