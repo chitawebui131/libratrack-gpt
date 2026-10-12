@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/qwen3-coder:30b",
+  "model": "ollama_chat/gpt-oss:20b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -118,7 +118,7 @@
         "step": "8.40",
         "check": "go vet ./...",
         "model": "ollama_chat/qwen3-coder:30b",
-        "at": "2026-10-12T19:32:00",
+        "at": "2026-10-12T19:52:55",
         "detail": "CHECK FAILED: go vet ./...\ninternal/repository/copy_repository_test.go:8:2: package libratrack/internal/repository/testhelper is not in std (/home/user/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.11.linux-amd64/src/libratrack/internal/repository/testhelper)"
       },
       "info": {
@@ -397,10 +397,10 @@
         },
         "8.40": {
           "attempts": 3,
-          "secs": 414.3,
+          "secs": 441.2,
           "model": "ollama_chat/qwen3-coder:30b",
           "ok": false,
-          "at": "2026-10-12T19:32:00"
+          "at": "2026-10-12T19:52:55"
         }
       }
     }
