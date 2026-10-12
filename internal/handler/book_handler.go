@@ -1,42 +1,25 @@
 package handler
 
 import (
-	"errors"
-	"libratrack/internal/model"
-	"libratrack/internal/repository"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"libratrack/internal/model"
+	"libratrack/internal/repository"
 )
 
-// BookHandler handles book-related HTTP requests.
 type BookHandler struct {
 	repo repository.BookRepository
 }
 
-// NewBookHandler creates a new BookHandler with the given repository.
 func NewBookHandler(repo repository.BookRepository) *BookHandler {
 	return &BookHandler{repo: repo}
 }
 
-// ErrorBody represents the body of an error response.
-type ErrorBody struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Details string `json:"details"`
-}
-
-// ErrorResponse represents the full error response payload.
-type ErrorResponse struct {
-	Error ErrorBody `json:"error"`
-}
-
-// Create handles the creation of a new book.
 func (h *BookHandler) Create(c *gin.Context) {
 	var req model.CreateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid request body", err.Error())
+		respondValidation(c, err)
 		return
 	}
 
@@ -50,14 +33,13 @@ func (h *BookHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(&book, req.AuthorIDs); err != nil {
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not create book", "")
+		respondRepoError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusCreated, book)
 }
 
-// GetByID retrieves a book by its ID.
 func (h *BookHandler) GetByID(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -66,129 +48,9 @@ func (h *BookHandler) GetByID(c *gin.Context) {
 
 	book, err := h.repo.FindByID(id)
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not load book", "")
+		respondRepoError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, book)
-}
-
-// List retrieves a paginated list of books, optionally filtered by category.
-func (h *BookHandler) List(c *gin.Context) {
-	category := c.Query("category")
-
-	pageStr := c.DefaultQuery("page", "1")
-	limitStr := c.DefaultQuery("limit", "20")
-
-	page, err := strconv.Atoi(pageStr)
-	if err != nil || page < 1 {
-		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid pagination", "")
-		return
-	}
-
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit < 1 {
-		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid pagination", "")
-		return
-	}
-
-	if limit > 100 {
-		limit = 100
-	}
-
-	var categoryID uint
-	if category != "" {
-		cat, err := h.repo.GetCategoryByName(category)
-		if err != nil {
-			if errors.Is(err, repository.ErrNotFound) {
-				// No such category; return empty list
-				c.JSON(http.StatusOK, []model.Book{})
-				return
-			}
-			respondError(c, http.StatusInternalServerError, "internal_error", "could not retrieve category", "")
-			return
-		}
-		categoryID = cat.ID
-	}
-
-	books, err := h.repo.List(categoryID, page, limit)
-	if err != nil {
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not list books", "")
-		return
-	}
-
-	c.JSON(http.StatusOK, books)
-}
-
-// Update handles updating an existing book.
-func (h *BookHandler) Update(c *gin.Context) {
-	id, ok := parseID(c)
-	if !ok {
-		return
-	}
-
-	var req model.UpdateBookRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		respondError(c, http.StatusUnprocessableEntity, "validation_error", "invalid request body", err.Error())
-		return
-	}
-
-	book, err := h.repo.FindByID(id)
-	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not load book", "")
-		return
-	}
-
-	book.Title = req.Title
-	book.ISBN = req.ISBN
-	book.CategoryID = req.CategoryID
-	book.PublishedYear = req.PublishedYear
-	book.Description = req.Description
-
-	if err := h.repo.Update(book, req.AuthorIDs); err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not update book", "")
-		return
-	}
-
-	c.JSON(http.StatusOK, book)
-}
-
-// Delete handles deleting an existing book.
-func (h *BookHandler) Delete(c *gin.Context) {
-	id, ok := parseID(c)
-	if !ok {
-		return
-	}
-
-	if err := h.repo.Delete(id); err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			respondError(c, http.StatusNotFound, "not_found", "book not found", "")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "internal_error", "could not delete book", "")
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
-
-// RegisterRoutes registers the book-related routes on the provided router group.
-func (h *BookHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.POST("/books", h.Create)
-	rg.GET("/books", h.List)
-	rg.GET("/books/:id", h.GetByID)
-	rg.PUT("/books/:id", h.Update)
-	rg.DELETE("/books/:id", h.Delete)
 }
