@@ -1,6 +1,8 @@
 package repository
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestBookListByCategory(t *testing.T) {
 	db := setupTestDB(t)
@@ -61,4 +63,27 @@ func TestBookListPagination(t *testing.T) {
 	author := mustAuthor(t, db, "Author One")
 
 	// Create five books in the same category
-	mustBook(t, db, "Book 1", "ISBN-1", cat.ID,
+	mustBook(t, db, "Book 1", "ISBN-1", cat.ID, []uint{author.ID})
+	mustBook(t, db, "Book 2", "ISBN-2", cat.ID, []uint{author.ID})
+	mustBook(t, db, "Book 3", "ISBN-3", cat.ID, []uint{author.ID})
+	mustBook(t, db, "Book 4", "ISBN-4", cat.ID, []uint{author.ID})
+	mustBook(t, db, "Book 5", "ISBN-5", cat.ID, []uint{author.ID})
+
+	repo := NewBookRepository(db)
+
+	// Page 1, limit 2 -> 2 books
+	page1, err := repo.List(0, 1, 2)
+	if err != nil {
+		t.Fatalf("List page 1 returned error: %v", err)
+	}
+	if len(page1) != 2 {
+		t.Fatalf("expected 2 books on page 1, got %d", len(page1))
+	}
+
+	// Page 3, limit 2 -> 1 book
+	page3, err := repo.List(0, 3, 2)
+	if err != nil {
+		t.Fatalf("List page 3 returned error: %v", err)
+	}
+	if len(page3) != 1 {
+		t.Fatalf("expected 1 book on page 3, got %
