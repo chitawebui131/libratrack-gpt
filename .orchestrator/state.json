@@ -102,7 +102,8 @@
         "8.26",
         "8.27",
         "8.28",
-        "8.29"
+        "8.29",
+        "8.30"
       ],
       "last_failed": null,
       "info": {
@@ -310,11 +311,11 @@
           "at": "2026-10-12T15:55:51"
         },
         "8.30": {
-          "attempts": 3,
-          "secs": 252.4,
-          "model": "ollama_chat/qwen2.5-coder:7b",
-          "ok": false,
-          "at": "2026-10-12T16:00:03"
+          "attempts": 2,
+          "secs": 241.7,
+          "model": "ollama_chat/gemma4:e4b",
+          "ok": true,
+          "at": "2026-10-12T16:12:09"
         }
       }
     }
