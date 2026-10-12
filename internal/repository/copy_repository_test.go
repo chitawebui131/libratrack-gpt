@@ -8,22 +8,30 @@ import (
 )
 
 func TestCopyCreateAndList(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
+	repo := NewCopyRepository(db)
 
+	// Setup data
 	category := model.Category{Name: "Fiction"}
 	author := model.Author{Name: "J. Doe"}
 	book := model.Book{Title: "The Great Novel", CategoryID: category.ID, AuthorID: author.ID}
 
-	repo := NewCopyRepository(db)
-
 	// Create two copies
-	// Copy 1: status empty (should default to available)
-	copy1 := model.Copy{BookID: book.ID, InventoryNo: "INV001", Status: ""}
+	// Copy 1: status empty (should become "available")
+	copy1 := model.Copy{
+		BookID: book.ID,
+		InventoryNo: "INV001",
+		Status: "", // Empty status
+	}
 	repo.Create(&copy1)
 
 	// Copy 2: status "lost"
-	copy2 := model.Copy{BookID: book.ID, InventoryNo: "INV002", Status: "lost"}
+	copy2 := model.Copy{
+		BookID: book.ID,
+		InventoryNo: "INV002",
+		Status: "lost",
+	}
 	repo.Create(&copy2)
 
 	// ListByBook returns 2 copies
@@ -37,15 +45,18 @@ func TestCopyCreateAndList(t *testing.T) {
 }
 
 func TestCopyCreateUnknownBook(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
 	repo := NewCopyRepository(db)
 
-	// BookID 9999 does not exist
-	copy := model.Copy{BookID: 9999, InventoryNo: "INV9999"}
+	// Try to create a copy for BookID 9999
+	copy := model.Copy{
+		BookID: 9999,
+		InventoryNo: "INV9999",
+		Status: "",
+	}
 
-	err := repo.Create(&copy)
+	_, err := repo.Create(&copy)
 	if err == nil {
 		t.Error("Expected ErrNotFound, got nil")
 	}
@@ -55,23 +66,30 @@ func TestCopyCreateUnknownBook(t *testing.T) {
 }
 
 func TestCopyDuplicateInventoryNo(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	// Setup book
-	book := model.Book{Title: "Test Book"}
-	db.Create(&book)
-
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
 	repo := NewCopyRepository(db)
 
+	// Setup a book
+	book := model.Book{Title: "Test Book"}
+	repo.Create(&book)
+
 	// First copy
-	copy1 := model.Copy{BookID: book.ID, InventoryNo: "DUP001"}
+	copy1 := model.Copy{
+		BookID: book.ID,
+		InventoryNo: "DUPINV",
+		Status: "available",
+	}
 	repo.Create(&copy1)
 
 	// Second copy with same InventoryNo
-	copy2 := model.Copy{BookID: book.ID, InventoryNo: "DUP001"}
+	copy2 := model.Copy{
+		BookID: book.ID,
+		InventoryNo: "DUPINV",
+		Status: "borrowed",
+	}
 
-	err := repo.Create(&copy2)
+	_, err := repo.Create(&copy2)
 	if err == nil {
 		t.Error("Expected ErrConflict, got nil")
 	}
@@ -81,24 +99,25 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 }
 
 func TestAvailability(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	// Setup book with 4 copies: 2 "available", 1 "borrowed", 1 "lost"
-	book := model.Book{Title: "Availability Test Book"}
-	db.Create(&book)
-
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
 	repo := NewCopyRepository(db)
 
-	// Create copies
-	// Available 1
-	repo.Create(&model.Copy{BookID: book.ID, InventoryNo: "A1", Status: "available"})
-	// Available 2
-	repo.Create(&model.Copy{BookID: book.ID, InventoryNo: "A2", Status: "available"})
-	// Borrowed
-	repo.Create(&model.Copy{BookID: book.ID, InventoryNo: "B1", Status: "borrowed"})
-	// Lost
-	repo.Create(&model.Copy{BookID: book.ID, InventoryNo: "L1", Status: "lost"})
+	// Setup book
+	book := model.Book{Title: "Availability Test Book"}
+	repo.Create(&book)
+
+	// Setup 4 copies: 2 "available", 1 "borrowed", 1 "lost"
+	copies := []model.Copy{
+		{BookID: book.ID, InventoryNo: "A1", Status: "available"},
+		{BookID: book.ID, InventoryNo: "A2", Status: "available"},
+		{BookID: book.ID, InventoryNo: "B1", Status: "borrowed"},
+		{BookID: book.ID, InventoryNo: "L1", Status: "lost"},
+	}
+
+	for i := range copies {
+		repo.Create(&copies[i])
+	}
 
 	// Check availability
 	availability, err := repo.Availability(book.ID)
@@ -115,14 +134,13 @@ func TestAvailability(t *testing.T) {
 }
 
 func TestAvailabilityNoCopies(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
+	repo := NewCopyRepository(db)
 
 	// Book without copies
 	book := model.Book{Title: "No Copies Book"}
-	db.Create(&book)
-
-	repo := NewCopyRepository(db)
+	repo.Create(&book)
 
 	// Check availability
 	availability, err := repo.Availability(book.ID)
@@ -139,12 +157,11 @@ func TestAvailabilityNoCopies(t *testing.T) {
 }
 
 func TestAvailabilityUnknownBook(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
+	db := setupTestDB()
+	// Removed db.Close() defer call to fix vet error
 	repo := NewCopyRepository(db)
 
-	// BookID 9999 does not exist
+	// Check availability for BookID 9999
 	_, err := repo.Availability(9999)
 	if err == nil {
 		t.Error("Expected ErrNotFound, got nil")
