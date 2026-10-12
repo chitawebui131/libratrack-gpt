@@ -104,13 +104,7 @@
         "8.28",
         "8.29"
       ],
-      "last_failed": {
-        "step": "8.30",
-        "check": "go build ./...",
-        "model": "ollama_chat/qwen2.5-coder:7b",
-        "at": "2026-10-12T16:00:03",
-        "detail": "CHECK FAILED: go build ./...\n# libratrack/internal/handler\ninternal/handler/copy_handler.go:12:6: CopyHandler redeclared in this block\n\tinternal/handler/copy_availability_handler.go:11:6: other declaration of CopyHandler\ninternal/handler/copy_handler.go:16:6: NewCopyHandler redeclared in this block\n\tinternal/handler/copy_availability_handler.go:15:6: other declaration of NewCopyHandler"
-      },
+      "last_failed": null,
       "info": {
         "8.1": {
           "attempts": 1,
