@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/gemma4:26b",
+  "model": "ollama_chat/gpt-oss:20b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -114,9 +114,9 @@
       "last_failed": {
         "step": "8.37",
         "check": "gofmt syntax",
-        "model": "ollama_chat/gemma4:e4b",
-        "at": "2026-10-12T16:28:09",
-        "detail": "CHECK FAILED: gofmt syntax\ninternal/repository/book_repository_create_test.go:51:49: expected ';', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected ';', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '{', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '}', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '}', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected operand, found 'EOF'\n\n[aider note] no 'Applied edit' line in aider's output: it probably changed nothing (the model may have ignored the edit format). Output tail:\n.ID, author2.ID}\n\n        repo := NewBookRepository(db)\n        err := repo.Create(book, authorIDs)\n        if err != nil {\n                t.Fatalf(\"Create failed: %v\", err)\n        }\n\n        // 4. FindByID and verify\n        found, err := repo.FindByID(book.ID)\n        if err != nil {\n                t.Fatalf(\"FindByID failed: %v\", err)\n        }\n\n        if found.Title != book.Title {\n                t.Errorf(\"Expected title %s, got %s\", book.Title, found.Title)\n        }\n\n        if len(found.Authors) != 2 {\n                t.\n\n------------\n► **ANSWER**\n\n\n\nTokens: 16k sent, 590 received."
+        "model": "ollama_chat/gemma4:26b",
+        "at": "2026-10-12T16:36:33",
+        "detail": "CHECK FAILED: gofmt syntax\ninternal/repository/book_repository_create_test.go:51:49: expected ';', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected ';', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '{', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '}', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected '}', found 'EOF'\ninternal/repository/book_repository_create_test.go:51:49: expected operand, found 'EOF'\n\n[aider note] no 'Applied edit' line in aider's output: it probably changed nothing (the model may have ignored the edit format). Output tail:\n*   `mustBook(t *testing.T, db *gorm.DB, title, isbn string, categoryID \nuint, authorIDs []uint) model.Book`\n\n    *   `TestBookCreateAndFind`:\n        ```go\n        func TestBookCreateAndFind(t *testing.T) {\n            db := setupTestDB(t)\n            cat := mustCategory(t, db, \"Fiction\")\n            a1 := mustAuthor(t, db, \"Author 1\")\n            a2 := mustAuthor(t, db, \"Author 2\")\n            repo := NewBookRepository(db)\n            book := &model.Book{\n                Title: \"Test Title\",\n                ISBN: \"1234567890\",\n\n------------\n► **ANSWER**\n\n\n\nTokens: 16k sent, 588 received."
       },
       "info": {
         "8.1": {
@@ -373,10 +373,10 @@
         },
         "8.37": {
           "attempts": 3,
-          "secs": 189.3,
-          "model": "ollama_chat/gemma4:e4b",
+          "secs": 423.6,
+          "model": "ollama_chat/gemma4:26b",
           "ok": false,
-          "at": "2026-10-12T16:28:09"
+          "at": "2026-10-12T16:36:33"
         }
       }
     }
