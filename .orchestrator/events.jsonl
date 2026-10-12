@@ -59,3 +59,6 @@
 {"d": "2026-10-12", "t": "04:23:14", "kind": "step", "text": "[1/33] === step 8.11 [build]: Запуск міграцій (migrate.go)"}
 {"d": "2026-10-12", "t": "04:28:18", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 304s"}
 {"d": "2026-10-12", "t": "04:28:20", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-12", "t": "04:28:20", "kind": "step", "text": "[2/33] === step 8.12 [build]: Підключення до PostgreSQL (db.go)"}
+{"d": "2026-10-12", "t": "04:32:02", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 222s"}
+{"d": "2026-10-12", "t": "04:32:21", "kind": "pass", "text": "    PASS (attempt 1)"}
