@@ -99,7 +99,8 @@
         "8.23",
         "8.24",
         "8.25",
-        "8.26"
+        "8.26",
+        "8.27"
       ],
       "last_failed": null,
       "info": {
@@ -284,6 +285,13 @@
           "model": "ollama_chat/qwen2.5-coder:7b",
           "ok": true,
           "at": "2026-10-12T15:50:34"
+        },
+        "8.27": {
+          "attempts": 1,
+          "secs": 100.0,
+          "model": "ollama_chat/qwen2.5-coder:7b",
+          "ok": true,
+          "at": "2026-10-12T15:52:14"
         }
       }
     }
