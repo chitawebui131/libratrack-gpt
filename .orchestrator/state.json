@@ -85,13 +85,7 @@
         "8.9",
         "8.10"
       ],
-      "last_failed": {
-        "step": "8.11",
-        "check": "aider",
-        "model": "ollama_chat/gemma4:26b",
-        "at": "2026-10-12T04:22:03",
-        "detail": "aider exited with code 124:\nTIMEOUT after 900s"
-      },
+      "last_failed": null,
       "info": {
         "8.1": {
           "attempts": 1,
