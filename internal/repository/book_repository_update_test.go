@@ -21,10 +21,10 @@ func TestBookUpdate(t *testing.T) {
 	// Update the book: new title, same ISBN, same category, second author only
 	repo := NewBookRepository(db)
 	if err := repo.Update(&model.Book{
-		ID:          book.ID,
-		Title:       "New Title",
-		ISBN:        book.ISBN,
-		CategoryID:  category.ID,
+		ID:         book.ID,
+		Title:      "New Title",
+		ISBN:       book.ISBN,
+		CategoryID: category.ID,
 	}, []uint{author2.ID}); err != nil {
 		t.Fatalf("Update returned error: %v", err)
 	}
@@ -53,10 +53,10 @@ func TestBookUpdateNotFound(t *testing.T) {
 
 	repo := NewBookRepository(db)
 	err := repo.Update(&model.Book{
-		ID:          9999,
-		Title:       "Nonexistent",
-		ISBN:        "ISBN-9999",
-		CategoryID:  category.ID,
+		ID:         9999,
+		Title:      "Nonexistent",
+		ISBN:       "ISBN-9999",
+		CategoryID: category.ID,
 	}, []uint{})
 	if err == nil {
 		t.Fatalf("Expected error for non-existent book, got nil")
