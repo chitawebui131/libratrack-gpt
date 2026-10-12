@@ -158,3 +158,6 @@
 {"d": "2026-10-12", "t": "15:52:14", "kind": "step", "text": "[3/18] === step 8.28 [build]: Репозиторій примірників"}
 {"d": "2026-10-12", "t": "15:54:08", "kind": "aider", "text": "    attempt 1 (ollama_chat/qwen2.5-coder:7b): aider rc=0, 114s"}
 {"d": "2026-10-12", "t": "15:54:12", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-12", "t": "15:54:12", "kind": "step", "text": "[4/18] === step 8.29 [build]: CopyHandler: Create і ListByBook"}
+{"d": "2026-10-12", "t": "15:55:47", "kind": "aider", "text": "    attempt 1 (ollama_chat/qwen2.5-coder:7b): aider rc=0, 95s"}
+{"d": "2026-10-12", "t": "15:55:50", "kind": "pass", "text": "    PASS (attempt 1)"}

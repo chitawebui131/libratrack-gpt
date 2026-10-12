@@ -3,9 +3,10 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"libratrack/internal/model"
 	"libratrack/internal/repository"
+
+	"github.com/gin-gonic/gin"
 )
 
 type CopyHandler struct {
