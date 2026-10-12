@@ -26,5 +26,9 @@ func (h *CopyHandler) Availability(c *gin.Context) {
 		respondRepoError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, gin.H{
+		"book_id":          bookID,
+		"total_copies":     result.TotalCopies,
+		"available_copies": result.AvailableCopies,
+	})
 }
