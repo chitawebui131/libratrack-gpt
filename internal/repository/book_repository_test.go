@@ -42,7 +42,7 @@ func (r *InMemoryBookRepository) FindByID(id uint) (*model.Book, error) {
 func (r *InMemoryBookRepository) List(category string, page, limit int) ([]*model.Book, error) {
 	var results []*model.Book
 	for _, book := range r.books {
-		if category == "" || book.Category == category {
+		if category == "" || (book.Category != nil && book.Category.Name == category) {
 			results = append(results, book)
 		}
 	}
@@ -90,7 +90,7 @@ func newTestBook(title string, category string) *model.Book {
 		Title:    title,
 		ISBN:     "isbn-" + title,
 		Author:   "Author",
-		Category: category,
+		Category: &model.Category{Name: category},
 	}
 }
 
@@ -171,7 +171,7 @@ func TestUpdateNotFound(t *testing.T) {
 		Title:    "Nonexistent",
 		ISBN:     "isbn-non",
 		Author:   "Author",
-		Category: "Fiction",
+		Category: &model.Category{Name: "Fiction"},
 	}
 	if err := repo.Update(book); err == nil {
 		t.Fatalf("expected error, got nil")
