@@ -3,9 +3,86 @@ package repository
 import (
 	"errors"
 	"testing"
+	"time"
+	"sort"
 
 	"libratrack/internal/model"
 )
+
+// Mock implementation for testing purposes
+type InMemoryBookRepository struct {
+	books map[uint]*model.Book
+	nextID uint
+}
+
+func NewInMemoryBookRepository() *InMemoryBookRepository {
+	return &InMemoryBookRepository{
+		books: make(map[uint]*model.Book),
+		nextID: 1,
+	}
+}
+
+func (r *InMemoryBookRepository) Create(book *model.Book) error {
+	book.ID = r.nextID
+	book.CreatedAt = time.Now()
+	book.UpdatedAt = time.Now()
+	r.books[r.nextID] = book
+	r.nextID++
+	return nil
+}
+
+func (r *InMemoryBookRepository) FindByID(id uint) (*model.Book, error) {
+	book, ok := r.books[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return book, nil
+}
+
+func (r *InMemoryBookRepository) List(category string, page, limit int) ([]*model.Book, error) {
+	var results []*model.Book
+	for _, book := range r.books {
+		if category == "" || book.Category == category {
+			results = append(results, book)
+		}
+	}
+
+	// Sort by ID to ensure predictable pagination results
+	sortedBooks := make([]*model.Book, len(results))
+	copy(sortedBooks, results)
+	sort.Slice(sortedBooks, func(i, j int) bool {
+		return sortedBooks[i].ID < sortedBooks[j].ID
+	})
+
+	start := (page - 1) * limit
+	end := start + limit
+
+	if start >= len(sortedBooks) {
+		return []*model.Book{}, nil
+	}
+	if end > len(sortedBooks) {
+		end = len(sortedBooks)
+	}
+
+	return sortedBooks[start:end], nil
+}
+
+func (r *InMemoryBookRepository) Update(book *model.Book) error {
+	if _, ok := r.books[book.ID]; !ok {
+		return ErrNotFound
+	}
+	book.UpdatedAt = time.Now()
+	r.books[book.ID] = book
+	return nil
+}
+
+func (r *InMemoryBookRepository) Delete(id uint) error {
+	if _, ok := r.books[id]; !ok {
+		return ErrNotFound
+	}
+	delete(r.books, id)
+	return nil
+}
 
 // newTestBook creates a book with the given title and category.
 func newTestBook(title string, category string) *model.Book {
