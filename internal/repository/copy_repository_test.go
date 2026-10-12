@@ -31,13 +31,13 @@ func TestCopyCreateAndList(t *testing.T) {
 	// Create copies
 	copyRepo := NewCopyRepository(db)
 	copy1, err := copyRepo.Create(model.Copy{
-		BookID:       book.ID,
-		InventoryNo:  "INV001",
-		Status:       "",
-		Location:     "Shelf A",
-		Acquisition:  "Purchase",
-		Condition:    "Good",
-		Notes:        "Test note 1",
+		BookID:      book.ID,
+		InventoryNo: "INV001",
+		Status:      "",
+		Location:    "Shelf A",
+		Acquisition: "Purchase",
+		Condition:   "Good",
+		Notes:       "Test note 1",
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, model.CopyStatusAvailable, copy1.Status)
