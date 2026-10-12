@@ -1,8 +1,6 @@
 package repository
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestBookListByCategory(t *testing.T) {
 	db := setupTestDB(t)
@@ -59,8 +57,8 @@ func TestBookListPagination(t *testing.T) {
 	// Create a category
 	cat := mustCategory(t, db, "Cat")
 
+	// Create an author
+	author := mustAuthor(t, db, "Author One")
+
 	// Create five books in the same category
-	mustBook(t, db, "Book 1", "ISBN-1", cat.ID, []uint{mustAuthor(t, db, "Author A").ID})
-	mustBook(t, db, "Book 2", "ISBN-2", cat.ID, []uint{mustAuthor(t, db, "Author B").ID})
-	mustBook(t, db, "Book 3", "ISBN-3", cat.ID, []uint{mustAuthor(t, db, "Author C").ID})
-	mustBook(t, db, "Book 4", "ISBN-4", cat.ID, []uint{mustAuthor
+	mustBook(t, db, "Book 1", "ISBN-1", cat.ID,
