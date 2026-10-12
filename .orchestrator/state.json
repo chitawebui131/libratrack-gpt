@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/gpt-oss:20b",
+  "model": "ollama_chat/qwen2.5-coder:7b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -97,7 +97,8 @@
         "8.21",
         "8.22",
         "8.23",
-        "8.24"
+        "8.24",
+        "8.25"
       ],
       "last_failed": null,
       "info": {
@@ -268,6 +269,13 @@
           "model": "ollama_chat/gpt-oss:20b",
           "ok": true,
           "at": "2026-10-12T06:25:50"
+        },
+        "8.25": {
+          "attempts": 1,
+          "secs": 102.5,
+          "model": "ollama_chat/gpt-oss:20b",
+          "ok": true,
+          "at": "2026-10-12T06:27:33"
         }
       }
     }
