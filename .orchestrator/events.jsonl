@@ -118,3 +118,6 @@
 {"d": "2026-10-12", "t": "06:02:15", "kind": "fail", "text": "    FAIL go build ./...\n        # libratrack/internal/handler\n        internal/handler/errors.go:14:6: respondError redeclared in this block\n        \tinternal/handler/book_handler.go:36:6: other declaration of respondError\n        internal/handler/errors.go:44:6: parseID redeclared in this block\n        \tinternal/handler/book_handler.go:73:6: other declaration o\n        ...[truncated]"}
 {"d": "2026-10-12", "t": "06:08:47", "kind": "aider", "text": "    attempt 2 (ollama_chat/gpt-oss:20b): aider rc=0, 392s"}
 {"d": "2026-10-12", "t": "06:08:50", "kind": "pass", "text": "    PASS (attempt 2)"}
+{"d": "2026-10-12", "t": "06:08:50", "kind": "step", "text": "[6/30] === step 8.19 [build]: BookHandler: структура, Create, GetByID"}
+{"d": "2026-10-12", "t": "06:10:51", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 121s"}
+{"d": "2026-10-12", "t": "06:10:54", "kind": "pass", "text": "    PASS (attempt 1)"}
