@@ -86,7 +86,7 @@ func (r *gormBookRepository) List(categoryID uint, page, limit int) ([]model.Boo
 	if categoryID != 0 {
 		query = query.Where("category_id = ?", categoryID)
 	}
-	if err := query.Offset((page-1)*limit).Limit(limit).Find(&books).Error; err != nil {
+	if err := query.Offset((page - 1) * limit).Limit(limit).Find(&books).Error; err != nil {
 		return nil, translateError(err)
 	}
 	return books, nil
@@ -99,12 +99,12 @@ func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
 			return err
 		}
 		if err := tx.Model(book).Updates(map[string]interface{}{
-			"Title":          book.Title,
-			"ISBN":           book.ISBN,
-			"CategoryID":     book.CategoryID,
-			"Publisher":      book.Publisher,
-			"PublishedYear":  book.PublishedYear,
-			"Description":    book.Description,
+			"Title":         book.Title,
+			"ISBN":          book.ISBN,
+			"CategoryID":    book.CategoryID,
+			"Publisher":     book.Publisher,
+			"PublishedYear": book.PublishedYear,
+			"Description":   book.Description,
 		}).Error; err != nil {
 			return err
 		}
