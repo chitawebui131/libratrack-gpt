@@ -8,27 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type CopyHandler struct {
+type CopyAvailabilityHandler struct {
 	repo repository.CopyRepository
 }
 
-func NewCopyHandler(repo repository.CopyRepository) *CopyHandler {
-	return &CopyHandler{repo: repo}
+func NewCopyAvailabilityHandler(repo repository.CopyRepository) *CopyAvailabilityHandler {
+	return &CopyAvailabilityHandler{repo: repo}
 }
 
-func (h *CopyHandler) Availability(c *gin.Context) {
+func (h *CopyAvailabilityHandler) Availability(c *gin.Context) {
 	bookID, ok := parseID(c)
 	if !ok {
 		return
 	}
 	result, err := h.repo.Availability(bookID)
 	if err != nil {
-		respondRepoError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"book_id":          bookID,
-		"total_copies":     result.TotalCopies,
-		"available_copies": result.AvailableCopies,
-	})
-}
+		respondRepoError(c,
