@@ -7,7 +7,6 @@ import (
 	"libratrack/internal/model"
 )
 
-// BookRepository defines the operations for managing books.
 type BookRepository interface {
 	Create(book *model.Book, authorIDs []uint) error
 	FindByID(id uint) (*model.Book, error)
@@ -20,12 +19,10 @@ type gormBookRepository struct {
 	db *gorm.DB
 }
 
-// NewBookRepository creates a new BookRepository with the given GORM DB.
 func NewBookRepository(db *gorm.DB) BookRepository {
 	return &gormBookRepository{db: db}
 }
 
-// uniqueIDs returns the input slice without duplicates, preserving order.
 func uniqueIDs(ids []uint) []uint {
 	seen := make(map[uint]bool)
 	var result []uint
@@ -38,7 +35,6 @@ func uniqueIDs(ids []uint) []uint {
 	return result
 }
 
-// loadAuthors loads authors by IDs, ensuring all exist.
 func loadAuthors(tx *gorm.DB, ids []uint) ([]model.Author, error) {
 	ids = uniqueIDs(ids)
 	var authors []model.Author
@@ -51,7 +47,6 @@ func loadAuthors(tx *gorm.DB, ids []uint) ([]model.Author, error) {
 	return authors, nil
 }
 
-// Create inserts a new book and associates authors.
 func (r *gormBookRepository) Create(book *model.Book, authorIDs []uint) error {
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		authors, err := loadAuthors(tx, authorIDs)
@@ -77,11 +72,61 @@ func (r *gormBookRepository) Create(book *model.Book, authorIDs []uint) error {
 	return nil
 }
 
-// FindByID retrieves a book by its ID, preloading related data.
 func (r *gormBookRepository) FindByID(id uint) (*model.Book, error) {
 	var b model.Book
 	if err := r.db.Preload("Authors").Preload("Category").Preload("Copies").First(&b, id).Error; err != nil {
 		return nil, translateError(err)
 	}
 	return &b, nil
+}
+
+func (r *gormBookRepository) List(categoryID uint, page, limit int) ([]model.Book, error) {
+	var books []model.Book
+	query := r.db.Preload("Authors").Preload("Category").Preload("Copies")
+	if categoryID != 0 {
+		query = query.Where("category_id = ?", categoryID)
+	}
+	if err := query.Offset((page-1)*limit).Limit(limit).Find(&books).Error; err != nil {
+		return nil, translateError(err)
+	}
+	return books, nil
+}
+
+func (r *gormBookRepository) Update(book *model.Book, authorIDs []uint) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		authors, err := loadAuthors(tx, authorIDs)
+		if err != nil {
+			return err
+		}
+		if err := tx.Model(book).Updates(map[string]interface{}{
+			"Title":          book.Title,
+			"ISBN":           book.ISBN,
+			"CategoryID":     book.CategoryID,
+			"Publisher":      book.Publisher,
+			"PublishedYear":  book.PublishedYear,
+			"Description":    book.Description,
+		}).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(book).Association("Authors").Replace(authors); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return translateError(err)
+	}
+	var fresh model.Book
+	if err := r.db.Preload("Authors").Preload("Category").First(&fresh, book.ID).Error; err != nil {
+		return translateError(err)
+	}
+	*book = fresh
+	return nil
+}
+
+func (r *gormBookRepository) Delete(id uint) error {
+	if err := r.db.Delete(&model.Book{}, id).Error; err != nil {
+		return translateError(err)
+	}
+	return nil
 }
