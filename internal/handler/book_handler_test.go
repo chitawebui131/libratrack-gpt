@@ -7,9 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"libratrack/internal/model"
 	"libratrack/internal/repository"
+
+	"github.com/gin-gonic/gin"
 )
 
 type fakeBookRepo struct {
