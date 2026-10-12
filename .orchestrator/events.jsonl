@@ -62,3 +62,13 @@
 {"d": "2026-10-12", "t": "04:28:20", "kind": "step", "text": "[2/33] === step 8.12 [build]: Підключення до PostgreSQL (db.go)"}
 {"d": "2026-10-12", "t": "04:32:02", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 222s"}
 {"d": "2026-10-12", "t": "04:32:21", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-12", "t": "04:32:21", "kind": "step", "text": "[3/33] === step 8.13 [build]: Спільні помилки репозиторію (errors.go)"}
+{"d": "2026-10-12", "t": "04:36:44", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:26b): aider rc=0, 263s"}
+{"d": "2026-10-12", "t": "04:36:44", "kind": "fail", "text": "    FAIL go build ./...\n        # libratrack/internal/repository\n        internal/repository/errors.go:10:5: ErrNotFound redeclared in this block\n        \tinternal/repository/book_repository.go:13:5: other declaration of ErrNotFound"}
+{"d": "2026-10-12", "t": "04:49:54", "kind": "aider", "text": "    attempt 2 (ollama_chat/gemma4:26b): aider rc=0, 790s"}
+{"d": "2026-10-12", "t": "04:49:59", "kind": "fail", "text": "    FAIL go vet ./...\n        # libratrack/internal/repository\n        # [libratrack/internal/repository]\n        vet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository"}
+{"d": "2026-10-12", "t": "04:57:03", "kind": "aider", "text": "    attempt 3 (ollama_chat/gemma4:26b): aider rc=0, 425s"}
+{"d": "2026-10-12", "t": "04:57:06", "kind": "fail", "text": "    FAIL go vet ./...\n        # libratrack/internal/repository\n        # [libratrack/internal/repository]\n        vet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository"}
+{"d": "2026-10-12", "t": "04:57:06", "kind": "table", "text": "\nstep  check  result  attempts  secs    failed check\n----  -----  ------  --------  ------  ------------\n8.11  build  ok      1         305.9               \n8.12  build  ok      1         241.1               \n8.13  build  FAIL    3         1484.9  go vet ./..."}
+{"d": "2026-10-12", "t": "04:57:06", "kind": "fail", "text": "\nSTOPPED at step 8.13 (Спільні помилки репозиторію (errors.go)): go vet ./...\n\nCHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository\n\nlogs: /home/user/libratrack-gpt/.orchestrator/runs/20261012-042314/logs\nfix it by hand and press Start to resume (or pick a step in the 'from' list)"}
+{"d": "2026-10-12", "t": "04:59:24", "kind": "model", "text": "model changed: ollama_chat/gemma4:26b -> ollama_chat/gemma4:e4b (applies to the next aider call)"}

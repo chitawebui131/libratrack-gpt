@@ -1,5 +1,5 @@
 {
-  "model": "ollama_chat/gemma4:26b",
+  "model": "ollama_chat/gemma4:e4b",
   "specs": {
     "tema8_small.md": {
       "completed": [
@@ -84,9 +84,16 @@
         "8.8",
         "8.9",
         "8.10",
-        "8.11"
+        "8.11",
+        "8.12"
       ],
-      "last_failed": null,
+      "last_failed": {
+        "step": "8.13",
+        "check": "go vet ./...",
+        "model": "ollama_chat/gemma4:26b",
+        "at": "2026-10-12T04:57:06",
+        "detail": "CHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository"
+      },
       "info": {
         "8.1": {
           "attempts": 1,
@@ -164,6 +171,20 @@
           "model": "ollama_chat/gemma4:26b",
           "ok": true,
           "at": "2026-10-12T04:28:20"
+        },
+        "8.12": {
+          "attempts": 1,
+          "secs": 241.1,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": true,
+          "at": "2026-10-12T04:32:21"
+        },
+        "8.13": {
+          "attempts": 3,
+          "secs": 1484.9,
+          "model": "ollama_chat/gemma4:26b",
+          "ok": false,
+          "at": "2026-10-12T04:57:06"
         }
       }
     }
