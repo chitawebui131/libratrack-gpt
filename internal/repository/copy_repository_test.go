@@ -111,6 +111,6 @@ func TestAvailabilityUnknownBook(t *testing.T) {
 	repo := NewCopyRepository(db)
 	_, err := repo.Availability(9999)
 	if !errors.Is(err, gorm.ErrRecordNotFound) && err != nil {
-		// Допускаємо будь-яку помилку відсутності запису в базі
+		
 	}
 }
