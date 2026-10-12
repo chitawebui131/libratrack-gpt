@@ -23,4 +23,8 @@ func (h *CopyAvailabilityHandler) Availability(c *gin.Context) {
 	}
 	result, err := h.repo.Availability(bookID)
 	if err != nil {
-		respondRepoError(c,
+		respondRepoError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
