@@ -35,9 +35,9 @@ func TestCopyCreateAndList(t *testing.T) {
 
 	// Create two copies
 	copy1 := model.Copy{
-		BookID:        book.ID,
-		InventoryNo:   "INV-001",
-		Status:        "", // Empty status should default to "available"
+		BookID:      book.ID,
+		InventoryNo: "INV-001",
+		Status:      "", // Empty status should default to "available"
 	}
 	copyRepo := NewCopyRepository(db)
 	createdCopy1, err := copyRepo.Create(copy1)
