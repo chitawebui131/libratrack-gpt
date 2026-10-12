@@ -20,9 +20,9 @@ func TestCopyCreateAndList(t *testing.T) {
 
 	// First copy with empty status
 	copy1 := &model.Copy{
-		BookID:     book.ID,
+		BookID:      book.ID,
 		InventoryNo: "INV1",
-		Status:     "",
+		Status:      "",
 	}
 	if err := repo.Create(copy1); err != nil {
 		t.Fatalf("unexpected error creating copy1: %v", err)
@@ -33,9 +33,9 @@ func TestCopyCreateAndList(t *testing.T) {
 
 	// Second copy with explicit status
 	copy2 := &model.Copy{
-		BookID:     book.ID,
+		BookID:      book.ID,
 		InventoryNo: "INV2",
-		Status:     "lost",
+		Status:      "lost",
 	}
 	if err := repo.Create(copy2); err != nil {
 		t.Fatalf("unexpected error creating copy2: %v", err)
@@ -57,9 +57,9 @@ func TestCopyCreateUnknownBook(t *testing.T) {
 	repo := NewCopyRepository(db)
 
 	copy := &model.Copy{
-		BookID:     9999,
+		BookID:      9999,
 		InventoryNo: "INV3",
-		Status:     "",
+		Status:      "",
 	}
 	if err := repo.Create(copy); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -79,9 +79,9 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 
 	// First copy
 	copy1 := &model.Copy{
-		BookID:     book.ID,
+		BookID:      book.ID,
 		InventoryNo: "INV4",
-		Status:     "",
+		Status:      "",
 	}
 	if err := repo.Create(copy1); err != nil {
 		t.Fatalf("unexpected error creating first copy: %v", err)
@@ -89,9 +89,9 @@ func TestCopyDuplicateInventoryNo(t *testing.T) {
 
 	// Duplicate inventory number
 	copy2 := &model.Copy{
-		BookID:     book.ID,
+		BookID:      book.ID,
 		InventoryNo: "INV4",
-		Status:     "",
+		Status:      "",
 	}
 	if err := repo.Create(copy2); !errors.Is(err, ErrConflict) {
 		t.Fatalf("expected ErrConflict, got %v", err)
