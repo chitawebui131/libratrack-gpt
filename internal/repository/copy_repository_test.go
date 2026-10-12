@@ -8,47 +8,39 @@ import (
 )
 
 func TestCopyCreateAndList(t *testing.T) {
-	// setupTestDB() is assumed to be available via testhelper_test.go
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
-	// Setup data (assuming helper functions exist to create these entities)
-	category := &model.Category{Name: "Fiction"}
-	author := &model.Author{Name: "J. Doe"}
-	book := &model.Book{Title: "The Great Novel", CategoryID: category.ID, AuthorID: author.ID}
-
-	// Assuming book creation results in bookID 1
-	bookID := 1
+	// Setup data (Category, Author, Book)
+	category := model.Category{Name: "Fiction"}
+	author := model.Author{Name: "J. Doe"}
+	book := model.Book{Title: "The Great Novel", CategoryID: category.ID, AuthorID: author.ID}
 
 	// Create two copies
 	copy1 := model.Copy{
-		BookID:      bookID,
+		BookID: book.ID,
 		InventoryNo: "INV001",
-		Status:      "", // Empty status should default to "available"
+		Status: "", // Should default to "available"
 	}
 	copy2 := model.Copy{
-		BookID:      bookID,
+		BookID: book.ID,
 		InventoryNo: "INV002",
-		Status:      "lost",
+		Status: "lost",
 	}
 
-	// Create copy 1
-	err1 := repo.Create(&copy1)
+	// Create copies
+	_, err1 := repo.Create(copy1)
 	if err1 != nil {
 		t.Fatalf("Failed to create copy 1: %v", err1)
 	}
 
-	// Create copy 2
-	err2 := repo.Create(&copy2)
+	_, err2 := repo.Create(copy2)
 	if err2 != nil {
 		t.Fatalf("Failed to create copy 2: %v", err2)
 	}
 
-	// Verify status of copy 1 (should be "available")
-	// Note: In a real test, we would fetch copy1 back to verify status, but we rely on the ListByBook check for coverage here.
-
 	// ListByBook returns 2 copies
-	copies, err := repo.ListByBook(bookID)
+	copies, err := repo.ListByBook(book.ID)
 	if err != nil {
 		t.Fatalf("Failed to list copies: %v", err)
 	}
@@ -58,115 +50,115 @@ func TestCopyCreateAndList(t *testing.T) {
 }
 
 func TestCopyCreateUnknownBook(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
 	copy := model.Copy{
-		BookID:      9999, // Unknown BookID
+		BookID: 9999, // Unknown BookID
 		InventoryNo: "INV9999",
-		Status:      "",
+		Status: "",
 	}
 
-	err := repo.Create(&copy)
-	if err == nil {
-		t.Fatal("Expected ErrNotFound, but got nil error")
-	}
-	if !errors.Is(err, model.ErrNotFound) {
+	_, err := repo.Create(copy)
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expected ErrNotFound, got %v", err)
 	}
 }
 
 func TestCopyDuplicateInventoryNo(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
-	bookID := 1 // Assume a valid book ID exists
+	book := model.Book{ID: 1} // Assume Book ID 1 exists
 
-	// First copy
 	copy1 := model.Copy{
-		BookID:      bookID,
+		BookID: book.ID,
 		InventoryNo: "INV001",
-		Status:      "",
+		Status: "",
 	}
-	err1 := repo.Create(&copy1)
+	copy2 := model.Copy{
+		BookID: book.ID,
+		InventoryNo: "INV001", // Duplicate InventoryNo
+		Status: "",
+	}
+
+	// Create first copy
+	_, err1 := repo.Create(copy1)
 	if err1 != nil {
 		t.Fatalf("Failed to create copy 1: %v", err1)
 	}
 
-	// Second copy with same InventoryNo
-	copy2 := model.Copy{
-		BookID:      bookID,
-		InventoryNo: "INV001",
-		Status:      "lost",
-	}
-
-	err2 := repo.Create(&copy2)
-	if err2 == nil {
-		t.Fatal("Expected ErrConflict, but got nil error")
-	}
-	if !errors.Is(err2, model.ErrConflict) {
+	// Create second copy (should fail)
+	_, err2 := repo.Create(copy2)
+	if !errors.Is(err2, ErrConflict) {
 		t.Errorf("Expected ErrConflict, got %v", err2)
 	}
 }
 
 func TestAvailability(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
-	bookID := 1 // Assume a valid book ID exists with 4 copies (2 available, 1 borrowed, 1 lost)
+	bookID := 1 // Assume Book ID 1 exists
 
-	// Call Availability
+	// Setup 4 copies: 2 "available", 1 "borrowed", 1 "lost"
+	copies := []model.Copy{
+		{BookID: bookID, InventoryNo: "A1", Status: "available"},
+		{BookID: bookID, InventoryNo: "A2", Status: "available"},
+		{BookID: bookID, InventoryNo: "B1", Status: "borrowed"},
+		{BookID: bookID, InventoryNo: "L1", Status: "lost"},
+	}
+
+	// Create copies
+	for _, copy := range copies {
+		_, err := repo.Create(copy)
+		if err != nil {
+			t.Fatalf("Failed to create copy: %v", err)
+		}
+	}
+
+	// Check availability
 	availability, err := repo.Availability(bookID)
 	if err != nil {
 		t.Fatalf("Availability failed: %v", err)
 	}
 
-	// Check results
-	expectedTotal := 4
-	expectedAvailable := 2
-
-	if availability.TotalCopies != expectedTotal {
-		t.Errorf("Expected TotalCopies %d, got %d", expectedTotal, availability.TotalCopies)
+	if availability.TotalCopies != 4 {
+		t.Errorf("Expected TotalCopies 4, got %d", availability.TotalCopies)
 	}
-	if availability.AvailableCopies != expectedAvailable {
-		t.Errorf("Expected AvailableCopies %d, got %d", expectedAvailable, availability.AvailableCopies)
+	if availability.AvailableCopies != 2 {
+		t.Errorf("Expected AvailableCopies 2, got %d", availability.AvailableCopies)
 	}
 }
 
 func TestAvailabilityNoCopies(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
-	bookID := 999 // Assume a valid book ID that exists but has no copies
+	bookID := 99 // Assume Book ID 99 exists but has no copies
 
+	// Check availability (should return 0, 0, no error)
 	availability, err := repo.Availability(bookID)
 	if err != nil {
 		t.Fatalf("Availability failed unexpectedly: %v", err)
 	}
 
-	// Check results
-	expectedTotal := 0
-	expectedAvailable := 0
-
-	if availability.TotalCopies != expectedTotal {
-		t.Errorf("Expected TotalCopies %d, got %d", expectedTotal, availability.TotalCopies)
+	if availability.TotalCopies != 0 {
+		t.Errorf("Expected TotalCopies 0, got %d", availability.TotalCopies)
 	}
-	if availability.AvailableCopies != expectedAvailable {
-		t.Errorf("Expected AvailableCopies %d, got %d", expectedAvailable, availability.AvailableCopies)
+	if availability.AvailableCopies != 0 {
+		t.Errorf("Expected AvailableCopies 0, got %d", availability.AvailableCopies)
 	}
 }
 
 func TestAvailabilityUnknownBook(t *testing.T) {
-	db := setupTestDB()
+	db := setupTestDB(t)
 	repo := NewCopyRepository(db)
 
 	bookID := 9999 // Unknown BookID
 
 	_, err := repo.Availability(bookID)
-	if err == nil {
-		t.Fatal("Expected ErrNotFound, but got nil error")
-	}
-	if !errors.Is(err, model.ErrNotFound) {
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expected ErrNotFound, got %v", err)
 	}
 }
