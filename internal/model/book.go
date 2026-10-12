@@ -13,6 +13,7 @@ type Book struct {
 	Description   string    `gorm:"type:text;not null;default:''" json:"description"`
 	Authors       []Author  `gorm:"many2many:book_authors" json:"authors,omitempty"`
 	Copies        []Copy    `gorm:"foreignKey:BookID" json:"copies,omitempty"`
+	Author        string    `gorm:"size:255;not null" json:"author"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
