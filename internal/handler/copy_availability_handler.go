@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	"libratrack/internal/model"
 	"libratrack/internal/repository"
 
 	"github.com/gin-gonic/gin"
