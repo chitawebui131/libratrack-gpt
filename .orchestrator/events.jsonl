@@ -136,3 +136,6 @@
 {"d": "2026-10-12", "t": "06:24:09", "kind": "step", "text": "[11/30] === step 8.24 [build]: Репозиторій авторів"}
 {"d": "2026-10-12", "t": "06:25:48", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 99s"}
 {"d": "2026-10-12", "t": "06:25:50", "kind": "pass", "text": "    PASS (attempt 1)"}
+{"d": "2026-10-12", "t": "06:25:50", "kind": "step", "text": "[12/30] === step 8.25 [build]: Репозиторій категорій"}
+{"d": "2026-10-12", "t": "06:27:31", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 100s"}
+{"d": "2026-10-12", "t": "06:27:33", "kind": "pass", "text": "    PASS (attempt 1)"}

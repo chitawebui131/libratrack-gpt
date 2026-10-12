@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"libratrack/internal/model"
+
+	"gorm.io/gorm"
 )
 
 type CategoryRepository interface {
