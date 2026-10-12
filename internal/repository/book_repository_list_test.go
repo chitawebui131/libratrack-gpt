@@ -2,8 +2,6 @@ package repository
 
 import (
 	"testing"
-
-	"libratrack/internal/model"
 )
 
 func TestBookListByCategory(t *testing.T) {
@@ -14,7 +12,7 @@ func TestBookListByCategory(t *testing.T) {
 	catB := mustCategory(t, db, "B")
 
 	// Create an author
-	author := mustAuthor(t, db, "Author")
+	author := mustAuthor(t, db, "Author One")
 
 	// Create books in category A
 	mustBook(t, db, "Book A1", "ISBN-A1", catA.ID, []uint{author.ID})
@@ -59,4 +57,10 @@ func TestBookListPagination(t *testing.T) {
 	db := setupTestDB(t)
 
 	// Create a category
-	cat := mustCategory(t,
+	cat := mustCategory(t, db, "Cat")
+
+	// Create five books in the same category
+	mustBook(t, db, "Book 1", "ISBN-1", cat.ID, []uint{mustAuthor(t, db, "Author A").ID})
+	mustBook(t, db, "Book 2", "ISBN-2", cat.ID, []uint{mustAuthor(t, db, "Author B").ID})
+	mustBook(t, db, "Book 3", "ISBN-3", cat.ID, []uint{mustAuthor(t, db, "Author C").ID})
+	mustBook(t, db, "Book 4", "ISBN-4", cat.ID, []uint{mustAuthor
