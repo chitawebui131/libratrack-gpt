@@ -277,3 +277,8 @@
 {"d": "2026-10-12", "t": "19:11:17", "kind": "stop", "text": "    stopped during step 8.39 (aider terminated); the step stays pending"}
 {"d": "2026-10-12", "t": "19:11:17", "kind": "stop", "text": "\nSTOPPED by the user after 0 step(s). Resume to continue."}
 {"d": "2026-10-12", "t": "19:20:11", "kind": "model", "text": "model changed: ollama_chat/qwen2.5-coder:14b -> ollama_chat/qwen3-coder:30b (applies to the next aider call)"}
+{"d": "2026-10-12", "t": "19:20:14", "kind": "info", "text": "note: uncommitted changes were committed as a snapshot before step 8.39"}
+{"d": "2026-10-12", "t": "19:20:14", "kind": "info", "text": "project : /home/user/libratrack-gpt\nspec    : tema8_small__1_.md\nmodel   : ollama_chat/qwen3-coder:30b\nsteps   : 8.39 -> 8.43 (5)\nlogs    : /home/user/libratrack-gpt/.orchestrator/runs/20261012-192014\n"}
+{"d": "2026-10-12", "t": "19:20:14", "kind": "step", "text": "[1/5] === step 8.39 [build]: Тести книг: List"}
+{"d": "2026-10-12", "t": "19:25:03", "kind": "aider", "text": "    attempt 1 (ollama_chat/qwen3-coder:30b): aider rc=0, 289s"}
+{"d": "2026-10-12", "t": "19:25:06", "kind": "pass", "text": "    PASS (attempt 1)"}
