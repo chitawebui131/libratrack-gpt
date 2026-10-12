@@ -63,12 +63,12 @@ func mustAuthor(t *testing.T, db *gorm.DB, name string) model.Author {
 func mustBook(t *testing.T, db *gorm.DB, title, isbn string, categoryID uint, authorIDs []uint) model.Book {
 	t.Helper()
 	book := model.Book{
-		Title:       title,
-		ISBN:        isbn,
-		CategoryID:  categoryID,
-		Publisher:   "Test Publisher",
+		Title:         title,
+		ISBN:          isbn,
+		CategoryID:    categoryID,
+		Publisher:     "Test Publisher",
 		PublishedYear: 2023,
-		Description: "Test description",
+		Description:   "Test description",
 	}
 
 	repo := NewBookRepository(db)
