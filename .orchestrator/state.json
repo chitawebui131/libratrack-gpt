@@ -118,7 +118,7 @@
         "step": "8.40",
         "check": "go vet ./...",
         "model": "ollama_chat/gemma4:e4b",
-        "at": "2026-10-12T21:14:37",
+        "at": "2026-10-12T21:30:07",
         "detail": "CHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/copy_repository_test.go:14:20: not enough arguments in call to setupTestDB\n\thave ()\n\twant (*testing.T)"
       },
       "info": {
@@ -397,10 +397,10 @@
         },
         "8.40": {
           "attempts": 3,
-          "secs": 283.2,
+          "secs": 284.5,
           "model": "ollama_chat/gemma4:e4b",
           "ok": false,
-          "at": "2026-10-12T21:14:37"
+          "at": "2026-10-12T21:30:07"
         }
       }
     }
