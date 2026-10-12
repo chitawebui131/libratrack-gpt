@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"libratrack/internal/repository"
+
+	"github.com/gin-gonic/gin"
 )
 
 // respondError sends an error response with the given status and details.
