@@ -54,8 +54,8 @@ func (h *BookHandler) Create(c *gin.Context) {
 	book := model.Book{
 		Title:         req.Title,
 		ISBN:          req.ISBN,
-		Author:        req.Author,
-		Category:      req.Category,
+		CategoryID:    req.CategoryID,
+		Publisher:     req.Publisher,
 		PublishedYear: req.PublishedYear,
 		Description:   req.Description,
 	}
@@ -157,8 +157,7 @@ func (h *BookHandler) Update(c *gin.Context) {
 
 	book.Title = req.Title
 	book.ISBN = req.ISBN
-	book.Author = req.Author
-	book.Category = req.Category
+	book.CategoryID = req.CategoryID
 	book.PublishedYear = req.PublishedYear
 	book.Description = req.Description
 
