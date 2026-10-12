@@ -86,7 +86,8 @@
         "8.10",
         "8.11",
         "8.12",
-        "8.13"
+        "8.13",
+        "8.14"
       ],
       "last_failed": null,
       "info": {
@@ -182,11 +183,11 @@
           "at": "2026-10-12T05:02:48"
         },
         "8.14": {
-          "attempts": 3,
-          "secs": 348.7,
-          "model": "ollama_chat/gemma4:e4b",
-          "ok": false,
-          "at": "2026-10-12T05:08:36"
+          "attempts": 2,
+          "secs": 316.3,
+          "model": "ollama_chat/gpt-oss:20b",
+          "ok": true,
+          "at": "2026-10-12T05:27:19"
         }
       }
     }
