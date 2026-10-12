@@ -108,3 +108,8 @@
 {"d": "2026-10-12", "t": "05:49:06", "kind": "fail", "text": "    FAIL go build ./...\n        # libratrack/internal/repository\n        internal/repository/book_repository_list.go:5:30: method gormBookRepository.List already declared at internal/repository/book_repository.go:91:30"}
 {"d": "2026-10-12", "t": "05:53:28", "kind": "aider", "text": "    attempt 2 (ollama_chat/gpt-oss:20b): aider rc=0, 261s"}
 {"d": "2026-10-12", "t": "05:53:31", "kind": "pass", "text": "    PASS (attempt 2)"}
+{"d": "2026-10-12", "t": "05:53:31", "kind": "step", "text": "[4/30] === step 8.17 [build]: Репозиторій книг: Update і Delete"}
+{"d": "2026-10-12", "t": "05:55:26", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 115s"}
+{"d": "2026-10-12", "t": "05:55:26", "kind": "fail", "text": "    FAIL go build ./...\n        # libratrack/internal/repository\n        internal/repository/book_repository_update.go:10:30: method gormBookRepository.Update already declared at internal/repository/book_repository.go:91:30\n        internal/repository/book_repository_update.go:48:30: method gormBookRepository.Delete already declared at internal/r\n        ...[truncated]"}
+{"d": "2026-10-12", "t": "06:00:31", "kind": "aider", "text": "    attempt 2 (ollama_chat/gpt-oss:20b): aider rc=0, 304s"}
+{"d": "2026-10-12", "t": "06:00:33", "kind": "pass", "text": "    PASS (attempt 2)"}
