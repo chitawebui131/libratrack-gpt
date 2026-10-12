@@ -2,7 +2,6 @@ package model
 
 import "time"
 
-// Book represents a library catalog entry.
 type Book struct {
 	ID            uint      `gorm:"primaryKey" json:"id"`
 	Title         string    `gorm:"size:255;not null" json:"title"`
@@ -18,7 +17,6 @@ type Book struct {
 	UpdatedAt     time.Time `json:"updated_at"`
 }
 
-// CreateBookRequest represents the payload for creating a new book.
 type CreateBookRequest struct {
 	Title         string `json:"title" binding:"required,max=255"`
 	ISBN          string `json:"isbn" binding:"required,min=10,max=20"`
@@ -29,7 +27,6 @@ type CreateBookRequest struct {
 	Description   string `json:"description" binding:"max=5000"`
 }
 
-// UpdateBookRequest represents the payload for updating an existing book.
 type UpdateBookRequest struct {
 	Title         string `json:"title" binding:"required,max=255"`
 	ISBN          string `json:"isbn" binding:"required,min=10,max=20"`
