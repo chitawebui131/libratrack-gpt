@@ -89,3 +89,10 @@
 {"d": "2026-10-12", "t": "05:08:36", "kind": "table", "text": "\nstep  check  result  attempts  secs   failed check\n----  -----  ------  --------  -----  ------------\n8.13  build  ok      2         189.8              \n8.14  build  FAIL    3         348.7  go vet ./..."}
 {"d": "2026-10-12", "t": "05:08:36", "kind": "fail", "text": "\nSTOPPED at step 8.14 (Нова модель Book): go vet ./...\n\nCHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:92:3: unknown field Author in struct literal of type model.Book\n\nlogs: /home/user/libratrack-gpt/.orchestrator/runs/20261012-045938/logs\nfix it by hand and press Start to resume (or pick a step in the 'from' list)"}
 {"d": "2026-10-12", "t": "05:22:00", "kind": "model", "text": "model changed: ollama_chat/gemma4:e4b -> ollama_chat/gpt-oss:20b (applies to the next aider call)"}
+{"d": "2026-10-12", "t": "05:22:03", "kind": "info", "text": "note: uncommitted changes were committed as a snapshot before step 8.14"}
+{"d": "2026-10-12", "t": "05:22:03", "kind": "info", "text": "project : /home/user/libratrack-gpt\nspec    : tema8_small__1_.md\nmodel   : ollama_chat/gpt-oss:20b\nsteps   : 8.14 -> 8.43 (30)\nlogs    : /home/user/libratrack-gpt/.orchestrator/runs/20261012-052203\n"}
+{"d": "2026-10-12", "t": "05:22:03", "kind": "step", "text": "[1/30] === step 8.14 [build]: Нова модель Book"}
+{"d": "2026-10-12", "t": "05:24:36", "kind": "aider", "text": "    attempt 1 (ollama_chat/gpt-oss:20b): aider rc=0, 153s"}
+{"d": "2026-10-12", "t": "05:24:38", "kind": "fail", "text": "    FAIL go vet ./...\n        # libratrack/internal/repository\n        # [libratrack/internal/repository]\n        vet: internal/repository/book_repository_test.go:92:3: unknown field Author in struct literal of type model.Book"}
+{"d": "2026-10-12", "t": "05:27:16", "kind": "aider", "text": "    attempt 2 (ollama_chat/gpt-oss:20b): aider rc=0, 158s"}
+{"d": "2026-10-12", "t": "05:27:19", "kind": "pass", "text": "    PASS (attempt 2)"}

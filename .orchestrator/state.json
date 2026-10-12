@@ -88,13 +88,7 @@
         "8.12",
         "8.13"
       ],
-      "last_failed": {
-        "step": "8.14",
-        "check": "go vet ./...",
-        "model": "ollama_chat/gemma4:e4b",
-        "at": "2026-10-12T05:08:36",
-        "detail": "CHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:92:3: unknown field Author in struct literal of type model.Book"
-      },
+      "last_failed": null,
       "info": {
         "8.1": {
           "attempts": 1,
