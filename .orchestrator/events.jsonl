@@ -72,3 +72,10 @@
 {"d": "2026-10-12", "t": "04:57:06", "kind": "table", "text": "\nstep  check  result  attempts  secs    failed check\n----  -----  ------  --------  ------  ------------\n8.11  build  ok      1         305.9               \n8.12  build  ok      1         241.1               \n8.13  build  FAIL    3         1484.9  go vet ./..."}
 {"d": "2026-10-12", "t": "04:57:06", "kind": "fail", "text": "\nSTOPPED at step 8.13 (Спільні помилки репозиторію (errors.go)): go vet ./...\n\nCHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository\n\nlogs: /home/user/libratrack-gpt/.orchestrator/runs/20261012-042314/logs\nfix it by hand and press Start to resume (or pick a step in the 'from' list)"}
 {"d": "2026-10-12", "t": "04:59:24", "kind": "model", "text": "model changed: ollama_chat/gemma4:26b -> ollama_chat/gemma4:e4b (applies to the next aider call)"}
+{"d": "2026-10-12", "t": "04:59:38", "kind": "info", "text": "note: uncommitted changes were committed as a snapshot before step 8.13"}
+{"d": "2026-10-12", "t": "04:59:38", "kind": "info", "text": "project : /home/user/libratrack-gpt\nspec    : tema8_small__1_.md\nmodel   : ollama_chat/gemma4:e4b\nsteps   : 8.13 -> 8.43 (31)\nlogs    : /home/user/libratrack-gpt/.orchestrator/runs/20261012-045938\n"}
+{"d": "2026-10-12", "t": "04:59:38", "kind": "step", "text": "[1/31] === step 8.13 [build]: Спільні помилки репозиторію (errors.go)"}
+{"d": "2026-10-12", "t": "05:00:31", "kind": "aider", "text": "    attempt 1 (ollama_chat/gemma4:e4b): aider rc=0, 53s"}
+{"d": "2026-10-12", "t": "05:00:34", "kind": "fail", "text": "    FAIL go vet ./...\n        # libratrack/internal/repository\n        # [libratrack/internal/repository]\n        vet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository"}
+{"d": "2026-10-12", "t": "05:02:45", "kind": "aider", "text": "    attempt 2 (ollama_chat/gemma4:e4b): aider rc=0, 131s"}
+{"d": "2026-10-12", "t": "05:02:48", "kind": "pass", "text": "    PASS (attempt 2)"}

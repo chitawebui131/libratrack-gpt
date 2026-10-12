@@ -2,22 +2,22 @@ package repository
 
 import (
 	"errors"
+	"sort"
 	"testing"
 	"time"
-	"sort"
 
 	"libratrack/internal/model"
 )
 
 // Mock implementation for testing purposes
 type InMemoryBookRepository struct {
-	books map[uint]*model.Book
+	books  map[uint]*model.Book
 	nextID uint
 }
 
 func NewInMemoryBookRepository() *InMemoryBookRepository {
 	return &InMemoryBookRepository{
-		books: make(map[uint]*model.Book),
+		books:  make(map[uint]*model.Book),
 		nextID: 1,
 	}
 }

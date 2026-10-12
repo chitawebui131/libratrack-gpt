@@ -87,13 +87,7 @@
         "8.11",
         "8.12"
       ],
-      "last_failed": {
-        "step": "8.13",
-        "check": "go vet ./...",
-        "model": "ollama_chat/gemma4:26b",
-        "at": "2026-10-12T04:57:06",
-        "detail": "CHECK FAILED: go vet ./...\n# libratrack/internal/repository\n# [libratrack/internal/repository]\nvet: internal/repository/book_repository_test.go:22:10: undefined: NewInMemoryBookRepository"
-      },
+      "last_failed": null,
       "info": {
         "8.1": {
           "attempts": 1,
