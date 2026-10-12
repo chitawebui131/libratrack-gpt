@@ -3,8 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"libratrack/internal/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (h *BookHandler) Update(c *gin.Context) {
