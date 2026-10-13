@@ -1,3 +1,4 @@
+.orchestrator/
 .env
 *.exe
 *.out
