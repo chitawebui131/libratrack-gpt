@@ -31,7 +31,8 @@ func (f *fakeBookRepo) Delete(id uint) error {
 	return f.deleteFn(id)
 }
 
-func (f *fakeBookRepo) List(page uint, limit int) ([]model.Book, error) {
+
+func (f *fakeBookRepo) List(page uint, limit int, _ int) ([]model.Book, error) {
 	return []model.Book{}, nil
 }
 
@@ -42,6 +43,7 @@ func (f *fakeBookRepo) Update(book *model.Book, authorIDs []uint) error {
 func (f *fakeBookRepo) GetCategoryByName(name string) (*model.Category, error) {
 	return nil, nil
 }
+
 
 func newTestRouter(repo repository.BookRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)

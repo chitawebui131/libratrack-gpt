@@ -413,13 +413,7 @@
     },
     "tema9.md": {
       "completed": [],
-      "last_failed": {
-        "step": "9.1",
-        "check": "go mod tidy",
-        "model": "ollama_chat/qwen2.5-coder:14b",
-        "at": "2026-10-13T04:55:59",
-        "detail": "CHECK FAILED: go mod tidy\ngo: libratrack/cmd/api imports\n\tgithub.com/gin-gonic/gin: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/cmd/api imports\n\tgithub.com/swaggo/files: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/cmd/api imports\n\tgithub.com/swaggo/gin-swagger: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/docs imports\n\tgithub.com/swaggo/swag: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/internal/repository imports\n\tgithub.com/golang-migrate/migrate/v4: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/internal/repository imports\n\tgithub.com/golang-migrate/migrate/v4/database/postgres: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/internal/repository imports\n\tgithub.com/golang-migrate/migrate/v4/source/file: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/internal/repository imports\n\tgithub.com/jackc/pgx/v5/pgconn: golang.org/x/crypto@v0.0.0-20230915160648-3a265a244d23: invalid version: unknown revision 3a265a244d23\ngo: libratrack/internal/repository imports\n\tgorm.io/driver/postgres\n...[truncated]"
-      },
+      "last_failed": null,
       "info": {
         "9.1": {
           "attempts": 3,
@@ -428,7 +422,8 @@
           "ok": false,
           "at": "2026-10-13T04:55:59"
         }
-      }
+      },
+      "in_progress": "9.1"
     }
   },
   "queue": [
