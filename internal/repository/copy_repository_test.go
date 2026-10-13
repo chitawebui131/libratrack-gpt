@@ -4,8 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"gorm.io/gorm"
 	"libratrack/internal/model"
+
+	"gorm.io/gorm"
 )
 
 func TestCopyCreateAndList(t *testing.T) {

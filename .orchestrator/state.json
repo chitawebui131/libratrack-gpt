@@ -114,7 +114,13 @@
         "8.38",
         "8.39"
       ],
-      "last_failed": null,
+      "last_failed": {
+        "step": "8.41",
+        "check": "go vet ./...",
+        "model": "ollama_chat/qwen2.5-coder:14b",
+        "at": "2026-10-12T22:12:28",
+        "detail": "CHECK FAILED: go vet ./...\n# libratrack/internal/handler\n# [libratrack/internal/handler]\nvet: internal/handler/book_handler_test.go:59:21: cannot use repo (variable of type *fakeBookRepo) as repository.BookRepository value in argument to newTestRouter: *fakeBookRepo does not implement repository.BookRepository (missing method GetCategoryByName)"
+      },
       "info": {
         "8.1": {
           "attempts": 1,
@@ -395,19 +401,18 @@
           "model": "ollama_chat/gemma4:e4b",
           "ok": false,
           "at": "2026-10-12T21:34:54"
+        },
+        "8.41": {
+          "attempts": 3,
+          "secs": 1745.6,
+          "model": "ollama_chat/qwen2.5-coder:14b",
+          "ok": false,
+          "at": "2026-10-12T22:12:28"
         }
       }
     }
   },
   "queue": [
-    {
-      "id": "730e0861",
-      "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema8_small__1_.md",
-      "from_step": "8.41",
-      "to": "",
-      "only": "",
-      "include_skipped": false
-    },
     {
       "id": "5fe74fff",
       "spec": "/home/user/libratrack-gpt/.orchestrator/specs/tema9.md",
