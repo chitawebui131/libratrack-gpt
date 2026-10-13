@@ -1,32 +1,41 @@
 package model
 
-import "time"
+import (
+	"time"
 
-type CopyStatus string
-
-const (
-	CopyStatusAvailable   CopyStatus = "available"
-	CopyStatusBorrowed    CopyStatus = "borrowed"
-	CopyStatusLost        CopyStatus = "lost"
-	CopyStatusUnderRepair CopyStatus = "under_repair"
+	"gorm.io/gorm"
 )
 
+// Copy represents a physical copy of a book.
 type Copy struct {
-	ID          uint       `gorm:"primaryKey" json:"id"`
-	BookID      uint       `gorm:"not null;index" json:"book_id"`
-	InventoryNo string     `gorm:"size:50;not null;uniqueIndex" json:"inventory_no"`
-	Status      CopyStatus `gorm:"size:20;not null;default:available" json:"status"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	gorm.Model
+	BookID uint `gorm:"not null"`
+	// Book is the associated book.
+	// NOTE: Book and Book.Copies must never be preloaded together (JSON cycle).
+	Book *Book `json:"book,omitempty" gorm:"foreignKey:BookID"`
 }
 
-type CreateCopyRequest struct {
-	InventoryNo string     `json:"inventory_no" binding:"required,max=50"`
-	Status      CopyStatus `json:"status" binding:"omitempty,oneof=available borrowed lost under_repair"`
+// Book represents a title.
+type Book struct {
+	gorm.Model
+	Title       string `json:"title"`
+	AuthorID    uint   `json:"author_id"`
+	Author      *Author `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
+	CategoryID  uint   `json:"category_id"`
+	Category    *Category `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
+	Copies      []Copy `json:"copies"`
 }
 
-type BookAvailability struct {
-	BookID          uint `json:"book_id"`
-	TotalCopies     int  `json:"total_copies"`
-	AvailableCopies int  `json:"available_copies"`
+// Author represents the author of a book.
+type Author struct {
+	gorm.Model
+	Name  string `json:"name"`
+	Books []Book `json:"books"`
+}
+
+// Category represents a genre or category.
+type Category struct {
+	gorm.Model
+	Name  string `json:"name"`
+	Books []Book `json:"books"`
 }
