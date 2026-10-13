@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -18,12 +16,12 @@ type Copy struct {
 // Book represents a title.
 type Book struct {
 	gorm.Model
-	Title       string `json:"title"`
-	AuthorID    uint   `json:"author_id"`
-	Author      *Author `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
-	CategoryID  uint   `json:"category_id"`
-	Category    *Category `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
-	Copies      []Copy `json:"copies"`
+	Title      string    `json:"title"`
+	AuthorID   uint      `json:"author_id"`
+	Author     *Author   `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
+	CategoryID uint      `json:"category_id"`
+	Category   *Category `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
+	Copies     []Copy    `json:"copies"`
 }
 
 // Author represents the author of a book.

@@ -9,14 +9,14 @@ import (
 // Loan represents a borrowing transaction.
 type Loan struct {
 	gorm.Model
-	CopyID      uint      `gorm:"not null" json:"copy_id"`
-	UserID      uint      `gorm:"not null" json:"user_id"`
-	BorrowedAt  time.Time `json:"borrowed_at"`
-	DueAt       time.Time `json:"due_at"`
-	ReturnedAt  *time.Time `json:"returned_at"` // Nullable
-	FineAmount  int       `json:"fine_amount"` // Money is stored as an integer (UAH) and never as float
-	Copy        *Copy     `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
-	User        *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	CopyID     uint       `gorm:"not null" json:"copy_id"`
+	UserID     uint       `gorm:"not null" json:"user_id"`
+	BorrowedAt time.Time  `json:"borrowed_at"`
+	DueAt      time.Time  `json:"due_at"`
+	ReturnedAt *time.Time `json:"returned_at"` // Nullable
+	FineAmount int        `json:"fine_amount"` // Money is stored as an integer (UAH) and never as float
+	Copy       *Copy      `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
+	User       *User      `json:"user,omitempty" gorm:"foreignKey:UserID"`
 }
 
 // CreateLoanRequest holds data required to initiate a loan.
@@ -27,9 +27,9 @@ type CreateLoanRequest struct {
 
 // LoanStatus filter constants
 const (
-	LoanStatusActive    = "active"
-	LoanStatusReturned  = "returned"
-	LoanStatusOverdue   = "overdue"
+	LoanStatusActive   = "active"
+	LoanStatusReturned = "returned"
+	LoanStatusOverdue  = "overdue"
 )
 
 // IsValidLoanStatus checks if the provided status string is valid.
