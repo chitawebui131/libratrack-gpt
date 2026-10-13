@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,6 +18,7 @@ type fakeBookRepo struct {
 	createFn func(book *model.Book, authorIDs []uint) error
 	findFn   func(id uint) (*model.Book, error)
 	deleteFn func(id uint) error
+	listFn   func(page uint, limit int, offset int) ([]model.Book, error)
 }
 
 func (f *fakeBookRepo) Create(book *model.Book, authorIDs []uint) error {
@@ -31,8 +33,10 @@ func (f *fakeBookRepo) Delete(id uint) error {
 	return f.deleteFn(id)
 }
 
-
-func (f *fakeBookRepo) List(page uint, limit int, _ int) ([]model.Book, error) {
+func (f *fakeBookRepo) List(page uint, limit int, offset int) ([]model.Book, error) {
+	if f.listFn != nil {
+		return f.listFn(page, limit, offset)
+	}
 	return []model.Book{}, nil
 }
 
@@ -44,7 +48,6 @@ func (f *fakeBookRepo) GetCategoryByName(name string) (*model.Category, error) {
 	return nil, nil
 }
 
-
 func newTestRouter(repo repository.BookRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -52,6 +55,7 @@ func newTestRouter(repo repository.BookRepository) *gin.Engine {
 	r.POST("/books", h.Create)
 	r.GET("/books/:id", h.GetByID)
 	r.DELETE("/books/:id", h.Delete)
+	r.GET("/books", h.List)
 	return r
 }
 
@@ -214,5 +218,53 @@ func TestDeleteBook204(t *testing.T) {
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("Expected status code 204, got %d", w.Code)
+	}
+}
+
+func TestListBooks200(t *testing.T) {
+	repo := &fakeBookRepo{
+		listFn: func(page uint, limit int, offset int) ([]model.Book, error) {
+			return []model.Book{
+				{ID: 1, Title: "Book One", Isbn: "1111111111"},
+				{ID: 2, Title: "Book Two", Isbn: "2222222222"},
+			}, nil
+		},
+	}
+	r := newTestRouter(repo)
+
+	req, _ := http.NewRequest("GET", "/books?page=1&limit=10", nil)
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code 200, got %d", w.Code)
+	}
+
+	var response []model.Book
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Errorf("Failed to unmarshal response body: %v", err)
+	}
+
+	if len(response) != 2 {
+		t.Errorf("Expected 2 books in response, got %d", len(response))
+	}
+}
+
+func TestListBooksServerError500(t *testing.T) {
+	repo := &fakeBookRepo{
+		listFn: func(page uint, limit int, offset int) ([]model.Book, error) {
+			return nil, errors.New("database connection failed")
+		},
+	}
+	r := newTestRouter(repo)
+
+	req, _ := http.NewRequest("GET", "/books?page=1&limit=10", nil)
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("Expected status code 500, got %d", w.Code)
 	}
 }

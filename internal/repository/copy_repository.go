@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"libratrack/internal/model"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -12,8 +11,12 @@ import (
 type CopyRepository interface {
 	GetCopyByID(ctx context.Context, id uint) (*model.Copy, error)
 	GetCopiesByBookID(ctx context.Context, bookID uint) ([]model.Copy, error)
-	UpdateCopyStatus(ctx context.Context, copyID uint, status model.CopyStatus) error
-	// Other methods...
+	UpdateCopyStatus(ctx context.Context, copyID uint, status string) error
+	
+	// Методи, які викликаються у ваших хендлерах:
+	Create(ctx context.Context, copy *model.Copy) error
+	ListByBook(ctx context.Context, bookID uint) ([]model.Copy, error)
+	Availability(ctx context.Context, bookID uint) (*model.BookAvailability, error)
 }
 
 type copyRepository struct {
@@ -25,17 +28,15 @@ func NewCopyRepository(db *gorm.DB) CopyRepository {
 	return &copyRepository{DB: db}
 }
 
-// GetCopyByID retrieves a copy by its ID.
 func (r *copyRepository) GetCopyByID(ctx context.Context, id uint) (*model.Copy, error) {
-	var copy model.Copy
-	err := r.DB.WithContext(ctx).First(&copy, id).Error
+	var cp model.Copy
+	err := r.DB.WithContext(ctx).First(&cp, id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &copy, nil
+	return &cp, nil
 }
 
-// GetCopiesByBookID retrieves all copies associated with a specific book ID.
 func (r *copyRepository) GetCopiesByBookID(ctx context.Context, bookID uint) ([]model.Copy, error) {
 	var copies []model.Copy
 	err := r.DB.WithContext(ctx).Where("book_id = ?", bookID).Find(&copies).Error
@@ -45,9 +46,7 @@ func (r *copyRepository) GetCopiesByBookID(ctx context.Context, bookID uint) ([]
 	return copies, nil
 }
 
-// UpdateCopyStatus updates the status of a copy.
-func (r *copyRepository) UpdateCopyStatus(ctx context.Context, copyID uint, status model.CopyStatus) error {
-	// Note: In a real application, we would validate the status against allowed transitions.
+func (r *copyRepository) UpdateCopyStatus(ctx context.Context, copyID uint, status string) error {
 	result := r.DB.WithContext(ctx).Model(&model.Copy{}).Where("id = ?", copyID).Update("status", status)
 	if result.Error != nil {
 		return result.Error
@@ -56,4 +55,34 @@ func (r *copyRepository) UpdateCopyStatus(ctx context.Context, copyID uint, stat
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (r *copyRepository) Create(ctx context.Context, cp *model.Copy) error {
+	return r.DB.WithContext(ctx).Create(cp).Error
+}
+
+func (r *copyRepository) ListByBook(ctx context.Context, bookID uint) ([]model.Copy, error) {
+	var copies []model.Copy
+	err := r.DB.WithContext(ctx).Where("book_id = ?", bookID).Find(&copies).Error
+	return copies, err
+}
+
+func (r *copyRepository) Availability(ctx context.Context, bookID uint) (*model.BookAvailability, error) {
+	var total int64
+	var available int64
+
+	err := r.DB.WithContext(ctx).Model(&model.Copy{}).Where("book_id = ?", bookID).Count(&total).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.DB.WithContext(ctx).Model(&model.Copy{}).Where("book_id = ? AND status = ?", bookID, "available").Count(&available).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.BookAvailability{
+		TotalCopies:     int(total),
+		AvailableCopies: int(available),
+	}, nil
 }

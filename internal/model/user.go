@@ -17,9 +17,9 @@ type User struct {
 
 // Role constants
 const (
-	RoleAdmin    = "admin"
+	RoleAdmin     = "admin"
 	RoleLibrarian = "librarian"
-	RoleReader   = "reader"
+	RoleReader    = "reader"
 )
 
 // IsValidRole checks if the provided role string is one of the defined roles.

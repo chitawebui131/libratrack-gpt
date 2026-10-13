@@ -412,18 +412,33 @@
       }
     },
     "tema9.md": {
-      "completed": [],
-      "last_failed": null,
+      "completed": [
+        "9.1"
+      ],
+      "last_failed": {
+        "step": "9.2",
+        "check": "go build ./...",
+        "model": "ollama_chat/gemma4:e4b",
+        "at": "2026-10-13T05:13:57",
+        "detail": "CHECK FAILED: go build ./...\n# libratrack/internal/model\ninternal/model/copy.go:27:6: Book redeclared in this block\n\tinternal/model/book.go:5:6: other declaration of Book\ninternal/model/copy.go:38:6: Author redeclared in this block\n\tinternal/model/author.go:5:6: other declaration of Author"
+      },
       "info": {
         "9.1": {
+          "attempts": 1,
+          "secs": 334.6,
+          "model": "ollama_chat/gemma4:e4b",
+          "ok": true,
+          "at": "2026-10-13T05:09:39"
+        },
+        "9.2": {
           "attempts": 3,
-          "secs": 643.1,
-          "model": "ollama_chat/qwen2.5-coder:14b",
+          "secs": 258.0,
+          "model": "ollama_chat/gemma4:e4b",
           "ok": false,
-          "at": "2026-10-13T04:55:59"
+          "at": "2026-10-13T05:13:57"
         }
       },
-      "in_progress": "9.1"
+      "in_progress": "9.2"
     }
   },
   "queue": [

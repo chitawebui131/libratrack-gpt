@@ -8,9 +8,9 @@ import (
 type LoanStatus string
 
 const (
-	LoanStatusActive    LoanStatus = "active"
-	LoanStatusReturned  LoanStatus = "returned"
-	LoanStatusOverdue   LoanStatus = "overdue"
+	LoanStatusActive   LoanStatus = "active"
+	LoanStatusReturned LoanStatus = "returned"
+	LoanStatusOverdue  LoanStatus = "overdue"
 )
 
 // IsValidLoanStatus checks if the provided loan status string is valid.
@@ -20,17 +20,17 @@ func IsValidLoanStatus(s string) bool {
 
 // Loan represents a borrowing transaction.
 type Loan struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	CopyID      uint      `gorm:"not null" json:"copy_id"`
-	UserID      uint      `gorm:"not null" json:"user_id"`
-	BorrowedAt  time.Time `json:"borrowed_at"`
-	DueAt       time.Time `json:"due_at"`
-	ReturnedAt  *time.Time `gorm:"column:returned_at" json:"returned_at"` // Nullable
-	FineAmount  int       `gorm:"default:0" json:"fine_amount"` // Money is stored as an integer and never as float
-	Copy        *Copy     `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
-	User        *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID         uint       `gorm:"primaryKey" json:"id"`
+	CopyID     uint       `gorm:"not null" json:"copy_id"`
+	UserID     uint       `gorm:"not null" json:"user_id"`
+	BorrowedAt time.Time  `json:"borrowed_at"`
+	DueAt      time.Time  `json:"due_at"`
+	ReturnedAt *time.Time `gorm:"column:returned_at" json:"returned_at"` // Nullable
+	FineAmount int        `gorm:"default:0" json:"fine_amount"`          // Money is stored as an integer and never as float
+	Copy       *Copy      `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
+	User       *User      `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
 }
 
 // CreateLoanRequest defines the input structure for creating a new loan.
