@@ -39,6 +39,10 @@ func (f *fakeBookRepo) Update(book *model.Book, authorIDs []uint) error {
 	return nil
 }
 
+func (f *fakeBookRepo) GetCategoryByName(name string) (*model.Category, error) {
+	return nil, nil
+}
+
 func newTestRouter(repo repository.BookRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
