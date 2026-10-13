@@ -2,18 +2,18 @@ package model
 
 // User represents a user in the system, used for authentication and Role-Based Access Control (RBAC).
 type User struct {
-	ID           uint   `gorm:"primaryKey" json:"id"`
-	FullName     string `json:"full_name"`
-	Email        string `gorm:"unique" json:"email"`
-	PasswordHash string `json:"-"` // Never serialize password hash
-	Role         string `json:"role"`
+	ID           uint   `gorm:"primaryKey"`
+	Email        string `gorm:"uniqueIndex;not null"`
+	PasswordHash string `gorm:"column:password_hash"` // JSON tag "-" ensures it is never serialized
+	FullName     string `gorm:"not null"`
+	Role         string `gorm:"type:varchar(50);not null"`
 }
 
 // Role constants
 const (
-	RoleAdmin     = "admin"
+	RoleAdmin    = "admin"
 	RoleLibrarian = "librarian"
-	RoleReader    = "reader"
+	RoleReader   = "reader"
 )
 
 // IsValidRole checks if the provided role string is one of the defined roles.
@@ -21,14 +21,14 @@ func IsValidRole(role string) bool {
 	return role == RoleAdmin || role == RoleLibrarian || role == RoleReader
 }
 
-// RegisterRequest holds data required for user registration.
+// RegisterRequest is used for user registration.
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email,max=255"`
 	Password string `json:"password" binding:"required,min=8,max=72"` // 72 is the bcrypt input limit in bytes
 	FullName string `json:"full_name" binding:"required,max=255"`
 }
 
-// LoginRequest holds data required for user login.
+// LoginRequest is used for user login.
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
@@ -42,7 +42,7 @@ type AuthResponse struct {
 	User        User   `json:"user"`
 }
 
-// UpdateUserRoleRequest holds data required to update a user's role.
+// UpdateUserRoleRequest is used to change a user's role.
 type UpdateUserRoleRequest struct {
 	Role string `json:"role" binding:"required,oneof=admin librarian reader"`
 }
