@@ -1,70 +1,59 @@
 package repository
 
 import (
-	"gorm.io/gorm"
-
+	"context"
 	"libratrack/internal/model"
+	"time"
+
+	"gorm.io/gorm"
 )
 
+// CopyRepository defines the interface for copy data access operations.
 type CopyRepository interface {
-	Create(copy *model.Copy) error
-	ListByBook(bookID uint) ([]model.Copy, error)
-	Availability(bookID uint) (*model.BookAvailability, error)
+	GetCopyByID(ctx context.Context, id uint) (*model.Copy, error)
+	GetCopiesByBookID(ctx context.Context, bookID uint) ([]model.Copy, error)
+	UpdateCopyStatus(ctx context.Context, copyID uint, status model.CopyStatus) error
+	// Other methods...
 }
 
-type gormCopyRepository struct {
-	db *gorm.DB
+type copyRepository struct {
+	DB *gorm.DB
 }
 
+// NewCopyRepository creates a new CopyRepository instance.
 func NewCopyRepository(db *gorm.DB) CopyRepository {
-	return &gormCopyRepository{db: db}
+	return &copyRepository{DB: db}
 }
 
-func (r *gormCopyRepository) ensureBookExists(bookID uint) error {
-	var n int64
-	if err := r.db.Model(&model.Book{}).Where("id = ?", bookID).Count(&n).Error; err != nil {
-		return translateError(err)
-	}
-	if n == 0 {
-		return ErrNotFound
-	}
-	return nil
-}
-
-func (r *gormCopyRepository) Create(copy *model.Copy) error {
-	if err := r.ensureBookExists(copy.BookID); err != nil {
-		return err
-	}
-	if copy.Status == "" {
-		copy.Status = model.CopyStatusAvailable
-	}
-	if err := r.db.Create(copy).Error; err != nil {
-		return translateError(err)
-	}
-	return nil
-}
-
-func (r *gormCopyRepository) ListByBook(bookID uint) ([]model.Copy, error) {
-	if err := r.ensureBookExists(bookID); err != nil {
+// GetCopyByID retrieves a copy by its ID.
+func (r *copyRepository) GetCopyByID(ctx context.Context, id uint) (*model.Copy, error) {
+	var copy model.Copy
+	err := r.DB.WithContext(ctx).First(&copy, id).Error
+	if err != nil {
 		return nil, err
 	}
+	return &copy, nil
+}
+
+// GetCopiesByBookID retrieves all copies associated with a specific book ID.
+func (r *copyRepository) GetCopiesByBookID(ctx context.Context, bookID uint) ([]model.Copy, error) {
 	var copies []model.Copy
-	if err := r.db.Where("book_id = ?", bookID).Order("id ASC").Find(&copies).Error; err != nil {
-		return nil, translateError(err)
-	}
-	if copies == nil {
-		copies = []model.Copy{}
+	err := r.DB.WithContext(ctx).Where("book_id = ?", bookID).Find(&copies).Error
+	if err != nil {
+		return nil, err
 	}
 	return copies, nil
 }
 
-func (r *gormCopyRepository) Availability(bookID uint) (*model.BookAvailability, error) {
-	if err := r.ensureBookExists(bookID); err != nil {
-		return nil, err
+// UpdateCopyStatus updates the status of a copy.
+func (r *copyRepository) UpdateCopyStatus(ctx context.Context, copyID uint, status model.CopyStatus) error {
+	// Note: In a real application, we would validate the status against allowed transitions.
+	result := r.DB.WithContext(ctx).Model(&model.Copy{}).Where("id = ?", copyID).Update("status", status)
+	if result.Error != nil {
+		return result.Error
 	}
-	result := model.BookAvailability{BookID: bookID}
-	if err := r.db.Raw("SELECT COUNT(*) AS total_copies, COUNT(*) FILTER (WHERE status = 'available') AS available_copies FROM copies WHERE book_id = ?", bookID).Scan(&result).Error; err != nil {
-		return nil, translateError(err)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
-	return &result, nil
+	return nil
 }

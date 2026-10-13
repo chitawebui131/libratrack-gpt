@@ -1,19 +1,25 @@
 package model
 
+import (
+	"time"
+)
+
 // User represents a user in the system, used for authentication and Role-Based Access Control (RBAC).
 type User struct {
-	ID           uint   `gorm:"primaryKey"`
-	Email        string `gorm:"uniqueIndex;not null"`
-	PasswordHash string `gorm:"column:password_hash"` // JSON tag "-" ensures it is never serialized
-	FullName     string `gorm:"not null"`
-	Role         string `gorm:"type:varchar(50);not null"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	Email        string    `gorm:"unique;not null" json:"email"`
+	PasswordHash string    `gorm:"column:password_hash" json:"-"` // PasswordHash must keep the JSON tag "-" so it is never serialized.
+	FullName     string    `gorm:"not null" json:"full_name"`
+	Role         string    `gorm:"default:reader" json:"role"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // Role constants
 const (
-	RoleAdmin     = "admin"
+	RoleAdmin    = "admin"
 	RoleLibrarian = "librarian"
-	RoleReader    = "reader"
+	RoleReader   = "reader"
 )
 
 // IsValidRole checks if the provided role string is one of the defined roles.
@@ -21,20 +27,20 @@ func IsValidRole(role string) bool {
 	return role == RoleAdmin || role == RoleLibrarian || role == RoleReader
 }
 
-// RegisterRequest is used for user registration.
+// RegisterRequest defines the input structure for user registration.
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email,max=255"`
-	Password string `json:"password" binding:"required,min=8,max=72"` // 72 is the bcrypt input limit in bytes
+	Password string `json:"password" binding:"required,min=8,max=72"` // 72 is the bcrypt input limit in bytes.
 	FullName string `json:"full_name" binding:"required,max=255"`
 }
 
-// LoginRequest is used for user login.
+// LoginRequest defines the input structure for user login.
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
-// AuthResponse is the structure returned upon successful authentication.
+// AuthResponse defines the structure returned upon successful authentication.
 type AuthResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
@@ -42,7 +48,7 @@ type AuthResponse struct {
 	User        User   `json:"user"`
 }
 
-// UpdateUserRoleRequest is used to change a user's role.
+// UpdateUserRoleRequest defines the input structure for updating a user's role.
 type UpdateUserRoleRequest struct {
 	Role string `json:"role" binding:"required,oneof=admin librarian reader"`
 }
