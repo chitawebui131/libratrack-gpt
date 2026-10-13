@@ -4,22 +4,22 @@ import "time"
 
 // Loan represents a borrowing transaction.
 type Loan struct {
-	ID          uint      `gorm:"primaryKey"`
-	CopyID      uint      `gorm:"index;not null"`
-	UserID      uint      `gorm:"index;not null"`
-	BorrowedAt  time.Time `gorm:"not null"`
-	DueAt       time.Time `gorm:"not null"`
-	ReturnedAt  *time.Time `gorm:"column:returned_at"` // nullable
-	FineAmount  int       `gorm:"type:integer;not null"` // money is stored as an integer and never as float
-	Copy        *Copy     `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
-	User        *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	ID         uint       `gorm:"primaryKey"`
+	CopyID     uint       `gorm:"index;not null"`
+	UserID     uint       `gorm:"index;not null"`
+	BorrowedAt time.Time  `gorm:"not null"`
+	DueAt      time.Time  `gorm:"not null"`
+	ReturnedAt *time.Time `gorm:"column:returned_at"`    // nullable
+	FineAmount int        `gorm:"type:integer;not null"` // money is stored as an integer and never as float
+	Copy       *Copy      `json:"copy,omitempty" gorm:"foreignKey:CopyID"`
+	User       *User      `json:"user,omitempty" gorm:"foreignKey:UserID"`
 }
 
 // LoanStatus constants
 const (
-	LoanStatusActive    = "active"
-	LoanStatusReturned  = "returned"
-	LoanStatusOverdue   = "overdue"
+	LoanStatusActive   = "active"
+	LoanStatusReturned = "returned"
+	LoanStatusOverdue  = "overdue"
 )
 
 // IsValidLoanStatus checks if the provided loan status string is valid.
