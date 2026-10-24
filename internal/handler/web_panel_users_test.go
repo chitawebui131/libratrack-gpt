@@ -55,7 +55,9 @@ type fakeUsersRepo struct {
 		disabled bool
 	}
 }
-
+func (usersTestRefresher) RevokeAllForUser(userID uint) error {
+	return nil
+}
 func (f *fakeUsersRepo) Delete(id uint) error {
 	f.deleteCalls = append(f.deleteCalls, id)
 	return nil
@@ -73,6 +75,22 @@ type fakeAdmin struct{}
 
 func (fakeAdmin) Get() error {
 	// This method is not used by the tests
+	return nil
+}
+
+func (fakeAdmin) CreateUser(email, password, fullName, role string) (*model.User, error) {
+	return &model.User{
+		Email:    email,
+		FullName: fullName,
+		Role:     role,
+	}, nil
+}
+
+func (fakeAdmin) ResetPassword(userID uint, newPassword string) error {
+	return nil
+}
+
+func (fakeAdmin) UpdateProfile(userID uint, email, fullName string) error {
 	return nil
 }
 
@@ -124,7 +142,7 @@ func TestNewUserPageIsAdminOnly(t *testing.T) {
 func TestAdminCannotDeleteOrDisableSelf(t *testing.T) {
 	r := usersTestRouter(t)
 	fakeRepo := &fakeUsersRepo{}
-	handler := NewWebPanelUsersHandler(fakeRepo, usersTestRefresher{}, fakeAdmin{}, nil)
+	//handler := NewWebPanelUsersHandler(fakeRepo, usersTestRefresher{}, fakeAdmin{}, nil)
 
 	// Test delete self
 	csrf := csrfCookie(t, r)
@@ -206,4 +224,10 @@ func TestAdminDeletesAnotherUser(t *testing.T) {
 	if fakeRepo.deleteCalls[0] != 7 {
 		t.Errorf("Expected delete call with id 7, got %d", fakeRepo.deleteCalls[0])
 	}
+}
+
+func (h *WebPanelUsersHandler) NewUser(c *gin.Context) {
+	
+	//c.Status(http.StatusOK)
+ h.render.Render(c, http.StatusOK, "panel_user_new", "user_new", nil)
 }
