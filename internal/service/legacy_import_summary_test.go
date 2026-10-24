@@ -63,24 +63,30 @@ func TestSummarizeGroupsAndSorts(t *testing.T) {
 }
 
 func TestTrimDetailsKeepsErrorsFirst(t *testing.T) {
-	rep := &model.ImportReport{
-		Details: []model.ImportRowResult{
-			{Status: "warning", Message: "warning 1", Line: 1},
-			{Status: "warning", Message: "warning 2", Line: 2},
-			{Status: "warning", Message: "warning 3", Line: 3},
-			{Status: "warning", Message: "warning 4", Line: 4},
-			{Status: "warning", Message: "warning 5", Line: 5},
-			{Status: "warning", Message: "warning 6", Line: 6},
-			{Status: "warning", Message: "warning 7", Line: 7},
-			{Status: "warning", Message: "warning 8", Line: 8},
-			{Status: "warning", Message: "warning 9", Line: 9},
-			{Status: "warning", Message: "warning 10", Line: 10},
-			{Status: "error", Message: "error 1", Line: 11},
-			{Status: "error", Message: "error 2", Line: 12},
-			{Status: "error", Message: "error 3", Line: 13},
-		},
+	
+	
+	makeReport := func() *model.ImportReport {
+		return &model.ImportReport{
+			Details: []model.ImportRowResult{
+				{Status: "warning", Message: "warning 1", Line: 1},
+				{Status: "warning", Message: "warning 2", Line: 2},
+				{Status: "warning", Message: "warning 3", Line: 3},
+				{Status: "warning", Message: "warning 4", Line: 4},
+				{Status: "warning", Message: "warning 5", Line: 5},
+				{Status: "warning", Message: "warning 6", Line: 6},
+				{Status: "warning", Message: "warning 7", Line: 7},
+				{Status: "warning", Message: "warning 8", Line: 8},
+				{Status: "warning", Message: "warning 9", Line: 9},
+				{Status: "warning", Message: "warning 10", Line: 10},
+				{Status: "error", Message: "error 1", Line: 11},
+				{Status: "error", Message: "error 2", Line: 12},
+				{Status: "error", Message: "error 3", Line: 13},
+			},
+		}
 	}
 
+	
+	rep := makeReport()
 	TrimDetails(rep, 5)
 
 	if rep.DetailsTotal != 13 {
@@ -107,12 +113,14 @@ func TestTrimDetailsKeepsErrorsFirst(t *testing.T) {
 		}
 	}
 
-	// Test with limit 0
-	TrimDetails(rep, 0)
-	if rep.DetailsTotal != 13 {
-		t.Errorf("expected DetailsTotal to be 13 after limit 0, got %d", rep.DetailsTotal)
+	
+	repZero := makeReport()
+	TrimDetails(repZero, 0)
+	
+	if repZero.DetailsTotal != 13 {
+		t.Errorf("expected DetailsTotal to be 13 after limit 0, got %d", repZero.DetailsTotal)
 	}
-	if len(rep.Details) != 13 {
-		t.Errorf("expected 13 details after limit 0, got %d", len(rep.Details))
+	if len(repZero.Details) != 13 {
+		t.Errorf("expected 13 details after limit 0, got %d", len(repZero.Details))
 	}
 }
