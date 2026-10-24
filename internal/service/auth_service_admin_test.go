@@ -22,6 +22,10 @@ func (f *fakeUserRepo) Create(u *model.User) error {
 	if f.createErr != nil {
 		return f.createErr
 	}
+	// Verify that email constraints are evaluated correctly in test profiles
+	if _, exists := f.byEmail[u.Email]; exists {
+		return repository.ErrConflict
+	}
 	f.byEmail[u.Email] = u
 	return nil
 }
@@ -35,19 +39,16 @@ func (f *fakeUserRepo) FindByEmail(email string) (*model.User, error) {
 }
 
 func TestCreateUserValidates(t *testing.T) {
-	// Save original bcryptCost and restore it after the test
 	originalBcryptCost := bcryptCost
 	t.Cleanup(func() {
 		bcryptCost = originalBcryptCost
 	})
 	bcryptCost = bcrypt.MinCost
 
-	// Create a fake repository
 	fake := &fakeUserRepo{
 		byEmail: make(map[string]*model.User),
 	}
 
-	// Create a token manager with a fixed secret
 	tokens, err := NewTokenManager(strings.Repeat("k", 32), time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -55,69 +56,61 @@ func TestCreateUserValidates(t *testing.T) {
 
 	authService := NewAuthService(fake, tokens)
 
-	// Test invalid role
+	// Test password validation checks first (Matches new code structure)
+	_, err = authService.CreateUser("test@example.com", "pass123", "Test User", "user")
+	if !errors.Is(err, ErrPasswordInvalid) {
+		t.Errorf("Expected ErrPasswordInvalid for short password, got %v", err)
+	}
+
+	_, err = authService.CreateUser("test@example.com", strings.Repeat("a", 73), "Test User", "user")
+	if !errors.Is(err, ErrPasswordInvalid) {
+		t.Errorf("Expected ErrPasswordInvalid for long password, got %v", err)
+	}
+
+	// Test invalid role parameter boundary processing
 	_, err = authService.CreateUser("test@example.com", "password123", "Test User", "invalid_role")
 	if err == nil {
 		t.Error("Expected error for invalid role")
 	}
 
-	// Test password too short
-	_, err = authService.CreateUser("test@example.com", "pass123", "Test User", "user")
-	if err != ErrPasswordInvalid {
-		t.Error("Expected ErrPasswordInvalid for short password")
-	}
-
-	// Test password too long
-	_, err = authService.CreateUser("test@example.com", strings.Repeat("a", 73), "Test User", "user")
-	if err != ErrPasswordInvalid {
-		t.Error("Expected ErrPasswordInvalid for long password")
-	}
-
-	// Test valid user creation
+	// Test valid user creation execution path
 	user, err := authService.CreateUser("Test@Example.Com", "password123", "  Test User  ", "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Check that the email is lowercased and trimmed
 	if user.Email != "test@example.com" {
 		t.Errorf("Expected email to be lowercased and trimmed, got %s", user.Email)
 	}
 
-	// Check that the full name is trimmed
 	if user.FullName != "Test User" {
 		t.Errorf("Expected full name to be trimmed, got %s", user.FullName)
 	}
 
-	// Check that the role is set correctly
 	if user.Role != "admin" {
 		t.Errorf("Expected role to be admin, got %s", user.Role)
 	}
 
-	// Check that the password hash is not empty and not equal to the password
-	if user.PasswordHash == "" {
-		t.Error("Password hash should not be empty")
-	}
-	if user.PasswordHash == "password123" {
-		t.Error("Password hash should not be equal to the password")
+	if user.PasswordHash == "" || user.PasswordHash == "password123" {
+		t.Error("Password hashing security checks failed")
 	}
 }
 
 func TestCreateUserEmailTaken(t *testing.T) {
-	// Save original bcryptCost and restore it after the test
+
 	originalBcryptCost := bcryptCost
 	t.Cleanup(func() {
 		bcryptCost = originalBcryptCost
 	})
 	bcryptCost = bcrypt.MinCost
 
-	// Create a fake repository with createErr set to ErrConflict
+
 	fake := &fakeUserRepo{
 		byEmail:   make(map[string]*model.User),
 		createErr: repository.ErrConflict,
 	}
 
-	// Create a token manager with a fixed secret
+
 	tokens, err := NewTokenManager(strings.Repeat("k", 32), time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -125,27 +118,25 @@ func TestCreateUserEmailTaken(t *testing.T) {
 
 	authService := NewAuthService(fake, tokens)
 
-	// Try to create a user - should return ErrEmailTaken
-	_, err = authService.CreateUser("test@example.com", "password123", "Test User", "user")
+
+	_, err = authService.CreateUser("test@example.com", "password123", "Test User", "admin")
 	if !errors.Is(err, ErrEmailTaken) {
-		t.Error("Expected ErrEmailTaken when email is taken")
+		t.Errorf("Expected ErrEmailTaken when email is taken, got %v", err)
 	}
 }
 
+
 func TestLoginDisabledUser(t *testing.T) {
-	// Save original bcryptCost and restore it after the test
 	originalBcryptCost := bcryptCost
 	t.Cleanup(func() {
 		bcryptCost = originalBcryptCost
 	})
 	bcryptCost = bcrypt.MinCost
 
-	// Create a fake repository
 	fake := &fakeUserRepo{
 		byEmail: make(map[string]*model.User),
 	}
 
-	// Create a token manager with a fixed secret
 	tokens, err := NewTokenManager(strings.Repeat("k", 32), time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -153,7 +144,6 @@ func TestLoginDisabledUser(t *testing.T) {
 
 	authService := NewAuthService(fake, tokens)
 
-	// Create a disabled user
 	hashedPassword, _ := HashPassword("password1")
 	disabledUser := &model.User{
 		ID:           1,
@@ -165,15 +155,13 @@ func TestLoginDisabledUser(t *testing.T) {
 	}
 	fake.byEmail["test@example.com"] = disabledUser
 
-	// Try to login with the right password - should return ErrAccountDisabled
 	_, err = authService.Login("test@example.com", "password1")
-	if err != ErrAccountDisabled {
-		t.Error("Expected ErrAccountDisabled for disabled user")
+	if !errors.Is(err, ErrAccountDisabled) {
+		t.Errorf("Expected ErrAccountDisabled for disabled user, got %v", err)
 	}
 
-	// Try to login with the wrong password - should return ErrInvalidCredentials
 	_, err = authService.Login("test@example.com", "wrongpassword")
-	if err != ErrInvalidCredentials {
-		t.Error("Expected ErrInvalidCredentials for wrong password")
+	if !errors.Is(err, ErrInvalidCredentials) {
+		t.Errorf("Expected ErrInvalidCredentials for wrong password, got %v", err)
 	}
 }
