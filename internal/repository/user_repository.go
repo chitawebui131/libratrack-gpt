@@ -13,6 +13,10 @@ type UserRepository interface {
 	FindByEmail(email string) (*model.User, error)
 	List(page, limit int) ([]model.User, error)
 	UpdateRole(id uint, role string) (*model.User, error)
+	UpdateProfile(id uint, email, fullName string) error
+	SetPasswordHash(id uint, hash string) error
+	SetDisabled(id uint, disabled bool) error
+	Delete(id uint) error
 }
 
 // gormUserRepository implements UserRepository using GORM.

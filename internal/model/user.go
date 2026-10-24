@@ -11,6 +11,7 @@ type User struct {
 	PasswordHash string    `gorm:"size:255;not null" json:"-"`
 	FullName     string    `gorm:"size:255;not null" json:"full_name"`
 	Role         string    `gorm:"size:20;not null" json:"role"`
+	Disabled     bool      `gorm:"column:disabled;not null;default:false" json:"disabled"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
