@@ -91,12 +91,12 @@ func registerWebRoutes(r *gin.Engine, w webHandlers) error {
 	admin := web.Group("", middleware.RequireWebRoles(w.Render.Forbidden, model.RoleAdmin))
 	admin.GET("/panel/users", w.PanelUsers.UsersPage)
 	admin.POST("/panel/users/:id/role", w.PanelUsers.ChangeRole)
-  admin.GET("/panel/new-user", w.PanelUsers.NewUserPage)
-  admin.POST("/panel/users", w.PanelUsers.CreateUser)
-  admin.GET("/panel/users/:id/edit", w.PanelUsers.EditUserPage)
-  admin.POST("/panel/users/:id", w.PanelUsers.UpdateUser)
-  admin.POST("/panel/users/:id/disable", w.PanelUsers.SetDisabled)
-  admin.POST("/panel/users/:id/delete", w.PanelUsers.DeleteUser)
+	admin.GET("/panel/new-user", w.PanelUsers.NewUserPage)
+	admin.POST("/panel/users", w.PanelUsers.CreateUser)
+	admin.GET("/panel/users/:id/edit", w.PanelUsers.EditUserPage)
+	admin.POST("/panel/users/:id", w.PanelUsers.UpdateUser)
+	admin.POST("/panel/users/:id/disable", w.PanelUsers.SetDisabled)
+	admin.POST("/panel/users/:id/delete", w.PanelUsers.DeleteUser)
 	// 8. r.NoRoute(
 	//        func(c *gin.Context) {
 	//            if strings.HasPrefix(c.Request.URL.Path, "/api/") {
