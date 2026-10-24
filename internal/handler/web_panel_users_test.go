@@ -86,9 +86,9 @@ func usersTestRouter(t *testing.T) *gin.Engine {
 	r := gin.New()
 	web := r.Group("", middleware.SecurityHeadersMiddleware(), middleware.CSRFMiddleware(cookies, render.Forbidden), middleware.WebAuthMiddleware(usersTestVerifier{}, usersTestRefresher{}, usersTestUsers{}, cookies))
 	admin := web.Group("", middleware.RequireWebRoles(render.Forbidden, model.RoleAdmin))
-	admin.GET("/panel/new-user", NewWebPanelUsersHandler(fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).NewUser)
-	admin.POST("/panel/users/:id/delete", NewWebPanelUsersHandler(fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).DeleteUser)
-	admin.POST("/panel/users/:id/disable", NewWebPanelUsersHandler(fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).SetDisabled)
+	admin.GET("/panel/new-user", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).NewUser)
+	admin.POST("/panel/users/:id/delete", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).DeleteUser)
+	admin.POST("/panel/users/:id/disable", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).SetDisabled)
 	return r
 }
 
@@ -123,7 +123,7 @@ func TestNewUserPageIsAdminOnly(t *testing.T) {
 
 func TestAdminCannotDeleteOrDisableSelf(t *testing.T) {
 	r := usersTestRouter(t)
-	fakeRepo := fakeUsersRepo{}
+	fakeRepo := &fakeUsersRepo{}
 	handler := NewWebPanelUsersHandler(fakeRepo, usersTestRefresher{}, fakeAdmin{}, nil)
 
 	// Test delete self
@@ -177,7 +177,7 @@ func TestAdminCannotDeleteOrDisableSelf(t *testing.T) {
 
 func TestAdminDeletesAnotherUser(t *testing.T) {
 	r := usersTestRouter(t)
-	fakeRepo := fakeUsersRepo{}
+	fakeRepo := &fakeUsersRepo{}
 
 	// Test delete another user
 	csrf := csrfCookie(t, r)
