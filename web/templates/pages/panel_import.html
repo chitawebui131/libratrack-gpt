@@ -28,6 +28,24 @@
     <div class="stat">Помилок {{.Errors}}</div>
     <div class="stat">Попереджень {{.Warnings}}</div>
   </div>
+  {{if .Summary}}
+  <h3>Підсумок за причинами</h3>
+  <table class="data">
+    <thead><tr><th>Статус</th><th>Причина</th><th>Кількість</th><th>Перший рядок</th><th>Приклад</th></tr></thead>
+    <tbody>
+      {{range .Summary}}
+      <tr>
+        <td>{{if eq .Status "error"}}Помилка{{else}}Попередження{{end}}</td>
+        <td>{{if eq .Code "name_empty"}}Порожня назва{{else if eq .Code "name_long"}}Назва довша за 255 символів{{else if eq .Code "count_invalid"}}Некоректне значення countBooks{{else if eq .Code "inventar_empty"}}Порожній inventar{{else if eq .Code "inventar_range"}}Некоректний діапазон inventar{{else if eq .Code "inventar_repeat_in_cell"}}Повторний номер у межах одного рядка{{else if eq .Code "inventory_in_file_twice"}}Той самий інвентарний номер у кількох рядках файлу{{else if eq .Code "field_too_long"}}Задовге значення поля{{else if eq .Code "no_author"}}Немає автора (буде «Невідомий автор»){{else if eq .Code "title_cut"}}Назва, можливо, обрізана (50 символів){{else if eq .Code "isbn_invalid"}}ISBN проігноровано (некоректний){{else if eq .Code "language_unknown"}}Мову проігноровано (невідома){{else if eq .Code "year_invalid"}}Рік проігноровано{{else if eq .Code "inventar_expanded"}}Номери розгорнуто за countBooks{{else if eq .Code "inventar_count_mismatch"}}Кількість номерів не збігається з countBooks{{else if eq .Code "db_conflict"}}Конфлікт у базі (дубль){{else}}Інше{{end}}</td>
+        <td>{{.Count}}</td>
+        <td>{{.FirstLine}}</td>
+        <td>{{.Example}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{end}}
+  {{if .Details}}<h3>Рядки (спочатку помилки){{if gt .DetailsTotal (len .Details)}}: показано {{len .Details}} із {{.DetailsTotal}}{{end}}</h3>{{end}}
   {{if .Details}}
   <table class="data">
     <thead><tr><th>Рядок</th><th>Статус</th><th>Повідомлення</th></tr></thead>
