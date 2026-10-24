@@ -1,0 +1,35 @@
+{{define "content"}}
+<h1 class="page-title">{{if .Data.ID}}Редагування користувача{{else}}Новий користувач{{end}}</h1>
+<form method="post" action="{{if .Data.ID}}/panel/users/{{.Data.ID}}{{else}}/panel/users{{end}}">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <div class="form-group">
+    <label for="full_name">Повне ім'я</label>
+    <input id="full_name" name="full_name" type="text" value="{{.Data.FullName}}" required>
+    {{template "field_error" .Data.Errors.FullName}}
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{.Data.Email}}" required>
+    {{template "field_error" .Data.Errors.Email}}
+  </div>
+  {{if not .Data.ID}}
+  <div class="form-group">
+    <label for="role">Роль</label>
+    <select id="role" name="role">
+      <option value="admin" {{if eq .Data.Role "admin"}}selected{{end}}>Адміністратор</option>
+      <option value="librarian" {{if eq .Data.Role "librarian"}}selected{{end}}>Бібліотекар</option>
+      <option value="reader" {{if eq .Data.Role "reader"}}selected{{end}}>Читач</option>
+    </select>
+  </div>
+  {{end}}
+  <div class="form-group">
+    <label for="password">{{if .Data.ID}}Новий пароль (залиште порожнім, щоб не змінювати){{else}}Пароль (від 8 до 72 символів){{end}}</label>
+    <input id="password" name="password" type="password" autocomplete="new-password" {{if not .Data.ID}}required{{end}}>
+    {{template "field_error" .Data.Errors.Password}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a class="btn btn-secondary" href="/panel/users">Скасувати</a>
+  </div>
+</form>
+{{end}}
