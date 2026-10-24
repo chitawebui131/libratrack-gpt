@@ -22,6 +22,13 @@
 {{else if eq .Flash "loan_error_limit_reached"}}<div class="flash flash-error" role="alert">Читач досяг ліміту активних видач.</div>
 {{else if eq .Flash "role_self_change"}}<div class="flash flash-error" role="alert">Не можна змінювати власну роль.</div>
 {{else if eq .Flash "generic_error"}}<div class="flash flash-error" role="alert">Не вдалося виконати дію.</div>
+{{else if eq .Flash "user_created"}}<div class="flash flash-success">Користувача створено.</div>
+{{else if eq .Flash "user_updated"}}<div class="flash flash-success">Користувача оновлено.</div>
+{{else if eq .Flash "user_deleted"}}<div class="flash flash-success">Користувача видалено.</div>
+{{else if eq .Flash "user_disabled"}}<div class="flash flash-success">Обліковий запис вимкнено.</div>
+{{else if eq .Flash "user_enabled"}}<div class="flash flash-success">Обліковий запис увімкнено.</div>
+{{else if eq .Flash "user_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: у користувача є історія видач. Вимкніть обліковий запис.</div>
+{{else if eq .Flash "user_self_action"}}<div class="flash flash-error" role="alert">Не можна виконувати цю дію над власним обліковим записом.</div>
 {{else if eq .Flash "author_deleted"}}<div class="flash flash-success">Автора видалено.</div>
 {{else if eq .Flash "category_deleted"}}<div class="flash flash-success">Категорію видалено.</div>
 {{else if eq .Flash "author_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: автор прив'язаний до книг.</div>
