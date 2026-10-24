@@ -21,25 +21,27 @@
     </tr>
   </thead>
   <tbody>
-    {{range .Data.Rows}}
-    <tr>
-      <td>{{.Title}}</td>
-      <td>{{range $index, $author := .Authors}}{{if $index}}, {{end}}{{$author.Name}}{{end}}</td>
-      <td>{{.Category.Name}}</td>
-      <td>{{.Year}}</td>
-      <td>{{.Available}} / {{.Total}}</td>
-      <td>
-        <a href="/books/{{.ID}}">Переглянути</a>
-        <a href="/panel/books/{{.ID}}/edit">Редагувати</a>
-        <form class="inline-form" method="post" action="/panel/books/{{.ID}}/delete">
-          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
-          <button type="submit" class="btn btn-danger btn-small">Видалити</button>
-        </form>
-      </td>
-    </tr>
-    {{end}}
+{{range .Data.Rows}}
+<tr>
+  <td>{{.Book.Title}}</td>
+  <td>{{range $index, $author := .Book.Authors}}{{if $index}}, {{end}}{{$author.FullName}}{{end}}</td>
+  <td>{{if .Book.Category}}{{.Book.Category.Name}}{{end}}</td>
+  <td>{{.Book.PublishedYear}}</td>
+  <td>{{.Available}} / {{.Total}}</td>
+  <td>
+    <a href="/books/{{.Book.ID}}">Переглянути</a>
+    <a href="/panel/books/{{.Book.ID}}/edit">Редагувати</a>
+    <form class="inline-form" method="post" action="/panel/books/{{.Book.ID}}/delete">
+      <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+      <button type="submit" class="btn btn-danger btn-small">Видалити</button>
+    </form>
+  </td>
+</tr>
+{{end}}
   </tbody>
 </table>
-{{else}}<p class="muted">Книг не знайдено.</p>{{end}}
+{{else}}
+<p class="muted">Книг не знайдено.</p>
+{{end}}
 {{template "pagination" .Data.Pager}}
 {{end}}

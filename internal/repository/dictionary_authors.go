@@ -4,7 +4,7 @@ import "libratrack/internal/model"
 
 func (r *gormDictionaryRepository) ListAuthors() ([]model.Author, error) {
 	var items []model.Author
-	err := r.db.Order("name ASC, id ASC").Find(&items).Error
+  err := r.db.Order("full_name ASC, id ASC").Find(&items).Error
 	if err != nil {
 		return nil, translateError(err)
 	}
@@ -29,7 +29,7 @@ func (r *gormDictionaryRepository) CreateAuthor(a *model.Author) error {
 }
 
 func (r *gormDictionaryRepository) UpdateAuthor(a *model.Author) error {
-	res := r.db.Model(&model.Author{}).Where("id = ?", a.ID).Select("Name").Updates(a)
+	res := r.db.Model(&model.Author{}).Where("id = ?", a.ID).Select("FullName", "Bio").Updates(a)
 	if res.Error != nil {
 		return translateError(res.Error)
 	}
