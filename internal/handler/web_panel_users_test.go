@@ -49,9 +49,9 @@ func (usersTestRefresher) Refresh(token string) (*model.AuthResponse, error) {
 
 type fakeUsersRepo struct {
 	repository.UserRepository
-	deleteCalls   []uint
+	deleteCalls      []uint
 	setDisabledCalls []struct {
-		id      uint
+		id       uint
 		disabled bool
 	}
 }
@@ -63,7 +63,7 @@ func (f *fakeUsersRepo) Delete(id uint) error {
 
 func (f *fakeUsersRepo) SetDisabled(id uint, disabled bool) error {
 	f.setDisabledCalls = append(f.setDisabledCalls, struct {
-		id      uint
+		id       uint
 		disabled bool
 	}{id: id, disabled: disabled})
 	return nil
