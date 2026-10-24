@@ -15,6 +15,11 @@ func WebAuthMiddleware(v TokenVerifier, refresher WebRefresher, users WebUserFin
 			if err == nil {
 				u, err := users.FindByID(id)
 				if err == nil {
+					if u.Disabled {
+						ClearAuthCookies(c, cfg)
+						c.Next()
+						return
+					}
 					setWebUser(c, u)
 					c.Next()
 					return
