@@ -1,0 +1,7 @@
+{{define "pagination"}}{{if gt .TotalPages 1}}
+<nav class="pagination" aria-label="Сторінки">
+  {{if .PrevURL}}<a class="btn btn-secondary btn-small" href="{{.PrevURL}}">Назад</a>{{end}}
+  <span>Сторінка {{.Page}} з {{.TotalPages}}</span>
+  {{if .NextURL}}<a class="btn btn-secondary btn-small" href="{{.NextURL}}">Вперед</a>{{end}}
+</nav>
+{{end}}{{end}}

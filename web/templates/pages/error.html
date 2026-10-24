@@ -1,0 +1,5 @@
+{{define "content"}}
+<h1 class="page-title">{{if eq .Data.Code 403}}Доступ заборонено{{else if eq .Data.Code 404}}Сторінку не знайдено{{else}}Щось пішло не так{{end}}</h1>
+<p>{{if eq .Data.Code 403}}У вас немає прав для перегляду цієї сторінки.{{else if eq .Data.Code 404}}Такої сторінки не існує.{{else}}Спробуйте ще раз пізніше.{{end}}</p>
+<p><a class="btn btn-primary" href="/catalog">До каталогу</a></p>
+{{end}}

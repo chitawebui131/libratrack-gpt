@@ -1,0 +1,28 @@
+{{define "content"}}
+<h1 class="page-title">Мої видачі</h1>
+{{if .Data.Rows}}
+<table class="data">
+  <thead><tr><th>Книга</th><th>Інв. номер</th><th>Видано</th><th>Повернути до</th><th>Повернено</th><th>Статус</th><th>Штраф</th></tr></thead>
+  <tbody>
+    {{range .Data.Rows}}
+    <tr>
+
+      <td><a href="/books/{{.Loan.BookID}}">{{.Loan.BookTitle}}</a></td>
+      <td>{{.Loan.InventoryNo}}</td>
+
+      <td>{{date .Loan.BorrowedAt}}</td>
+      <td>{{date .Loan.DueAt}}</td>
+      <td>{{if .Loan.ReturnedAt}}{{datePtr .Loan.ReturnedAt}}{{else}}-{{end}}</td>
+
+      <td>{{if .Loan.ReturnedAt}}<span class="badge badge-available">Повернено</span>{{else}}{{if .Overdue}}<span class="badge badge-overdue">Прострочено</span>{{else}}<span class="badge badge-borrowed">На руках</span>{{end}}{{end}}</td>
+
+      <td>{{if gt .Fine 0}}{{.Fine}} грн{{end}}</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="muted">У вас ще немає видач.</p>
+{{end}}
+{{template "pagination" .Data.Pager}}
+{{end}}

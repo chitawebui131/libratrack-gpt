@@ -1,0 +1,23 @@
+{{define "content"}}
+<h1 class="page-title">Панель бібліотекаря</h1>
+<div class="stats">
+
+  <div class="stat"><strong>{{.Data.TotalBooks}}</strong> <span class="muted">Книг</span></div>
+  <div class="stat"><strong>{{.Data.TotalCopies}}</strong> <span class="muted">Примірників</span></div>
+  <div class="stat"><strong>{{.Data.AvailableCopies}}</strong> <span class="muted">Доступних</span></div>
+  <div class="stat"><strong>{{.Data.ActiveLoans}}</strong> <span class="muted">Активних видач</span></div>
+  <div class="stat"><strong>{{.Data.OverdueLoans}}</strong> <span class="muted">Прострочених</span></div>
+</div>
+<h2>Розділи</h2>
+<ul>
+
+  <li><a href="/panel/books">Книги</a></li>
+  <li><a href="/panel/new-book">Нова книга</a></li>
+  <li><a href="/panel/authors">Автори</a></li>
+  <li><a href="/panel/categories">Категорії</a></li>
+  <li><a href="/panel/loans">Видачі</a></li>
+  <li><a href="/panel/reports">Звіти</a></li>
+  {{if eq .User.Role "admin"}}<li><a href="/panel/users">Користувачі</a></li>{{end}}
+  <li><a href="/panel/import">Імпорт і експорт книг</a></li>
+</ul>
+{{end}}

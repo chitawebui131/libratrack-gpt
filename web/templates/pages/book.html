@@ -1,0 +1,33 @@
+{{define "content"}}
+<h1 class="page-title">{{.Data.Book.Title}}</h1>
+<article class="card">
+  <!-- 1. A <p class="muted"> with the authors joined by comma: {{range $i, $a := .Data.Book.Authors}}{{if $i}}, {{end}}{{$a.FullName}}{{end}}. -->
+  <p class="muted">{{range $i, $a := .Data.Book.Authors}}{{if $i}}, {{end}}{{$a.FullName}}{{end}}</p>
+  <!-- 2. Paragraphs: "Категорія: " + {{if .Data.Book.Category}}{{.Data.Book.Category.Name}}{{end}}; "ISBN: {{.Data.Book.ISBN}}"; "Видавець: {{.Data.Book.Publisher}}"; "Рік: {{.Data.Book.PublishedYear}}" (only when the year is not zero). -->
+  <p>Категорія: {{if .Data.Book.Category}}{{.Data.Book.Category.Name}}{{end}}</p>
+  {{if .Data.Book.ISBN}}<p>ISBN: {{.Data.Book.ISBN}}</p>{{end}}
+  <p>Видавець: {{.Data.Book.Publisher}}</p>
+  {{if .Data.Book.PublishedYear}}
+  <p>Рік: {{.Data.Book.PublishedYear}}</p>
+  {{end}}
+  <!-- 3. A <p> with the description {{.Data.Book.Description}}. -->
+  <p>{{.Data.Book.Description}}</p>
+  <!-- 4. Availability: when .Data.Available is greater than 0: <span class="badge badge-available">Доступно {{.Data.Available}} з {{.Data.Total}}</span>, otherwise <span class="badge badge-borrowed">Немає в наявності</span>. -->
+  {{if gt .Data.Available 0}}
+  <span class="badge badge-available">Доступно {{.Data.Available}} з {{.Data.Total}}</span>
+  {{else}}
+  <span class="badge badge-borrowed">Немає в наявності</span>
+  {{end}}
+  <!-- 5. Optional paragraphs after ISBN -->
+  {{if .Data.Book.UDK}}<p>УДК: {{.Data.Book.UDK}}</p>{{end}}
+  {{if .Data.Book.BBK}}<p>ББК: {{.Data.Book.BBK}}</p>{{end}}
+  {{if .Data.Book.Language}}<p>Мова: {{.Data.Book.Language}}</p>{{end}}
+  {{if .Data.Book.PublicationCity}}<p>Місто видання: {{.Data.Book.PublicationCity}}</p>{{end}}
+  {{if .Data.Book.PageCount}}<p>Сторінок: {{.Data.Book.PageCount}}</p>{{end}}
+</article>
+{{if not .User}}
+<p class="muted">Щоб бачити свої видачі та історію, <a href="/login">увійдіть</a> або <a href="/register">зареєструйтесь</a>. Видачу книг оформлює бібліотекар.</p>
+{{end}}
+{{if .Data.IsStaff}}{{template "staff_copies" .}}{{end}}
+<p><a class="btn btn-secondary" href="/catalog">До каталогу</a></p>
+{{end}}

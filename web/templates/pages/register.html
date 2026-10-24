@@ -1,0 +1,28 @@
+{{define "content"}}
+<h1 class="page-title">Реєстрація</h1>
+<form method="post" action="/register">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <!-- 1. A div.form-group: <label for="full_name">Повне ім'я</label>, <input id="full_name" name="full_name" type="text" value="{{.Data.FullName}}" autocomplete="name" required>, then {{template "field_error" .Data.Errors.FullName}}. -->
+  <div class="form-group">
+    <label for="full_name">Повне ім'я</label>
+    <input id="full_name" name="full_name" type="text" value="{{.Data.FullName}}" autocomplete="name" required>
+    {{template "field_error" .Data.Errors.FullName}}
+  </div>
+  <!-- 2. A div.form-group: <label for="email">Email</label>, <input id="email" name="email" type="email" value="{{.Data.Email}}" autocomplete="username" required>, then {{template "field_error" .Data.Errors.Email}}. -->
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{.Data.Email}}" autocomplete="username" required>
+    {{template "field_error" .Data.Errors.Email}}
+  </div>
+  <!-- 3. A div.form-group: <label for="password">Пароль (мінімум 8 символів)</label>, <input id="password" name="password" type="password" autocomplete="new-password" required>, then {{template "field_error" .Data.Errors.Password}}. No value attribute. -->
+  <div class="form-group">
+    <label for="password">Пароль (мінімум 8 символів)</label>
+    <input id="password" name="password" type="password" autocomplete="new-password" required>
+    {{template "field_error" .Data.Errors.Password}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Зареєструватися</button>
+    <a class="btn btn-secondary" href="/login">Вхід</a>
+  </div>
+</form>
+{{end}}

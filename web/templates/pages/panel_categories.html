@@ -1,0 +1,39 @@
+{{define "content"}}
+<h1 class="page-title">Категорії</h1>
+<form method="post" action="{{if .Data.EditID}}/panel/categories/{{.Data.EditID}}{{else}}/panel/categories{{end}}">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <div class="form-group">
+    <label for="name">Назва</label>
+    <input id="name" name="name" type="text" value="{{.Data.Name}}" required>
+    {{template "field_error" .Data.Errors.Name}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{if .Data.EditID}}Зберегти{{else}}Додати{{end}}</button>
+    {{if .Data.EditID}}<a class="btn btn-secondary" href="/panel/categories">Скасувати</a>{{end}}
+  </div>
+</form>
+
+<div class="data">
+  <table>
+    <thead>
+      <tr>
+        <th>Назва</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Data.Categories}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td><a href="/panel/categories/{{.ID}}/edit">Редагувати</a>
+          <form class="inline-form" method="post" action="/panel/categories/{{.ID}}/delete">
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <button type="submit" class="btn btn-danger btn-small">Видалити</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

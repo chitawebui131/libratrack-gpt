@@ -1,0 +1,45 @@
+{{define "content"}}
+<h1 class="page-title">Книги</h1>
+<p><a class="btn btn-primary" href="/panel/new-book">Нова книга</a></p>
+<form method="get" action="/panel/books" class="filters">
+  <div class="form-group">
+    <label for="q">Пошук</label>
+    <input id="q" name="q" type="search" value="{{.Data.Query}}">
+    <button type="submit" class="btn btn-primary">Знайти</button>
+  </div>
+</form>
+{{if .Data.Rows}}
+<table class="data">
+  <thead>
+    <tr>
+      <th>Назва</th>
+      <th>Автори</th>
+      <th>Категорія</th>
+      <th>Рік</th>
+      <th>Примірники</th>
+      <th>Дії</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Data.Rows}}
+    <tr>
+      <td>{{.Title}}</td>
+      <td>{{range $index, $author := .Authors}}{{if $index}}, {{end}}{{$author.Name}}{{end}}</td>
+      <td>{{.Category.Name}}</td>
+      <td>{{.Year}}</td>
+      <td>{{.Available}} / {{.Total}}</td>
+      <td>
+        <a href="/books/{{.ID}}">Переглянути</a>
+        <a href="/panel/books/{{.ID}}/edit">Редагувати</a>
+        <form class="inline-form" method="post" action="/panel/books/{{.ID}}/delete">
+          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+          <button type="submit" class="btn btn-danger btn-small">Видалити</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}<p class="muted">Книг не знайдено.</p>{{end}}
+{{template "pagination" .Data.Pager}}
+{{end}}

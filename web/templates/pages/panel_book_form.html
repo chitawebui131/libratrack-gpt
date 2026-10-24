@@ -1,0 +1,91 @@
+{{define "content"}}
+<h1 class="page-title">{{if .Data.ID}}Редагування книги{{else}}Нова книга{{end}}</h1>
+<form method="post" action="{{if .Data.ID}}/panel/books/{{.Data.ID}}{{else}}/panel/books{{end}}">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+  <div class="form-group">
+    <label for="title">Назва</label>
+    <input id="title" name="title" type="text" value="{{.Data.Title}}" required>
+    {{template "field_error" .Data.Errors.Title}}
+  </div>
+
+  <div class="form-group">
+    <label for="isbn">ISBN<span class="muted">необов'язково</span></label>
+    <input id="isbn" name="isbn" type="text" value="{{.Data.ISBN}}">
+    {{template "field_error" .Data.Errors.ISBN}}
+  </div>
+  <div class="form-group">
+    <label for="udk">УДК</label>
+    <input id="udk" name="udk" type="text" value="{{.Data.UDK}}">
+    {{template "field_error" .Data.Errors.UDK}}
+  </div>
+  <div class="form-group">
+    <label for="language">Мова (код: ukr, rus, eng...)</label>
+    <input id="language" name="language" type="text" value="{{.Data.Language}}">
+    {{template "field_error" .Data.Errors.Language}}
+  </div>
+  <div class="form-group">
+    <label for="category_id">Категорія</label>
+    <select id="category_id" name="category_id" required>
+      {{range .Data.Categories}}
+        <option value="{{.ID}}"{{if eq .ID $.Data.CategoryID}} selected{{end}}>{{.Name}}</option>
+      {{end}}
+    </select>
+    {{template "field_error" .Data.Errors.CategoryID}}
+  </div>
+
+  <div class="form-group">
+    <label for="author_ids">Автори</label>
+    <select id="author_ids" name="author_ids" multiple size="6" required>
+      {{range .Data.Authors}}
+        <option value="{{.ID}}"{{if index $.Data.AuthorSelected .ID}} selected{{end}}>{{.FullName}}</option>
+      {{end}}
+    </select>
+    {{template "field_error" .Data.Errors.AuthorIDs}}
+  </div>
+
+  <div class="form-group">
+    <label for="publisher">Видавець</label>
+    <input id="publisher" name="publisher" type="text" value="{{.Data.Publisher}}">
+    {{template "field_error" .Data.Errors.Publisher}}
+  </div>
+  <div class="form-group">
+    <label for="published_year">Рік видання</label>
+    <input id="published_year" name="published_year" type="number" value="{{if .Data.PublishedYear}}{{.Data.PublishedYear}}{{end}}">
+    {{template "field_error" .Data.Errors.PublishedYear}}
+  </div>
+
+  <div class="form-group">
+    <label for="publication_city">Місто видання</label>
+    <input id="publication_city" name="publication_city" type="text" value="{{.Data.PublicationCity}}">
+    {{template "field_error" .Data.Errors.PublicationCity}}
+  </div>
+  <div class="form-group">
+    <label for="page_count">Сторінок</label>
+    <input id="page_count" name="page_count" type="number" value="{{if .Data.PageCount}}{{.Data.PageCount}}{{end}}">
+    {{template "field_error" .Data.Errors.PageCount}}
+  </div>
+  <div class="form-group">
+    <label for="bbk">ББК</label>
+    <input id="bbk" name="bbk" type="text" value="{{.Data.BBK}}">
+    {{template "field_error" .Data.Errors.BBK}}
+  </div>
+
+  <div class="form-group">
+    <label for="description">Опис</label>
+    <textarea id="description" name="description" rows="5">{{.Data.Description}}</textarea>
+    {{template "field_error" .Data.Errors.Description}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a class="btn btn-secondary" href="/panel/books">Скасувати</a>
+  </div>
+</form>
+{{if .Data.ID}}
+
+<form method="post" action="/panel/books/{{.Data.ID}}/delete">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <button type="submit" class="btn btn-danger">Видалити книгу</button>
+</form>
+{{end}}
+{{end}}

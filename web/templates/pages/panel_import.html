@@ -1,0 +1,55 @@
+{{define "content"}}
+<h1 class="page-title">Імпорт і експорт книг</h1>
+<section>
+  <h2>Імпорт з Excel або CSV</h2>
+  <p class="muted">Колонки: Код, inventar, name, author, year, city, publishing, department, countPage, BBK, countBooks; необов'язкові: UDK, ISBN, language. Формати: .xlsx, .csv (до 10 МБ).</p>
+  {{if .Data.Error}}<div class="flash flash-error" role="alert">{{if eq .Data.Error "no_file"}}Оберіть файл.{{else if eq .Data.Error "bad_type"}}Дозволені лише файли .xlsx і .csv.{{else}}Не вдалося прочитати файл. Перевірте заголовки колонок.{{end}}</div>{{end}}
+  <form method="post" action="/panel/import" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <div class="form-group">
+      <label for="file">Файл</label>
+      <input id="file" name="file" type="file" accept=".xlsx,.csv" required>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="dry_run" value="1" checked> Пробний запуск (без запису в базу)</label>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">Завантажити</button></div>
+  </form>
+</section>
+{{with .Data.Report}}
+<section>
+  <h2>Звіт{{if .DryRun}} (пробний запуск){{end}}</h2>
+  <div class="stats">
+    <div class="stat">Рядків {{.Rows}}</div>
+    <div class="stat">Книг створено {{.BooksCreated}}</div>
+    <div class="stat">Книг оновлено {{.BooksUpdated}}</div>
+    <div class="stat">Примірників додано {{.CopiesAdded}}</div>
+    <div class="stat">Пропущено {{.CopiesSkipped}}</div>
+    <div class="stat">Помилок {{.Errors}}</div>
+    <div class="stat">Попереджень {{.Warnings}}</div>
+  </div>
+  {{if .Details}}
+  <table class="data">
+    <thead><tr><th>Рядок</th><th>Статус</th><th>Повідомлення</th></tr></thead>
+    <tbody>
+      {{range .Details}}
+      <tr>
+        <td>{{.Line}}</td>
+        <td>{{.Status}}</td>
+        <td>{{.Message}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{end}}
+</section>
+{{end}}
+<section>
+  <h2>Експорт</h2>
+  <p>
+    <a class="btn btn-secondary" href="/panel/export?format=csv">Завантажити CSV</a>
+    <a class="btn btn-secondary" href="/panel/export?format=xlsx">Завантажити XLSX</a>
+  </p>
+  <p class="muted">Експортуються книги, що мають хоча б один примірник. Файл можна імпортувати назад.</p>
+</section>
+{{end}}

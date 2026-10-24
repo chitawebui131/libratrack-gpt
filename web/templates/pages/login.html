@@ -1,0 +1,23 @@
+{{define "content"}}
+<h1 class="page-title">Вхід</h1>
+<form method="post" action="/login">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <input type="hidden" name="next" value="{{.Data.Next}}">
+  <!-- 1. A div.form-group with <label for="email">Email</label> and <input id="email" name="email" type="email" value="{{.Data.Email}}" autocomplete="username" required>, then {{template "field_error" .Data.Errors.Email}}. -->
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{.Data.Email}}" autocomplete="username" required>
+    {{template "field_error" .Data.Errors.Email}}
+  </div>
+  <!-- 2. A div.form-group with <label for="password">Пароль</label> and <input id="password" name="password" type="password" autocomplete="current-password" required>, then {{template "field_error" .Data.Errors.Password}}. The password input has NO value attribute. -->
+  <div class="form-group">
+    <label for="password">Пароль</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    {{template "field_error" .Data.Errors.Password}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Увійти</button>
+    <a class="btn btn-secondary" href="/register">Реєстрація</a>
+  </div>
+</form>
+{{end}}

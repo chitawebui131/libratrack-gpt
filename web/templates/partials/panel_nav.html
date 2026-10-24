@@ -1,0 +1,13 @@
+{{define "panel_nav"}}
+<nav class="panel-nav" aria-label="Панель керування">
+  <a href="/panel">Огляд</a>
+  <a href="/panel/books">Книги</a>
+  <a href="/panel/new-book">Нова книга</a>
+  <a href="/panel/authors">Автори</a>
+  <a href="/panel/categories">Категорії</a>
+  <a href="/panel/loans">Видачі</a>
+  <a href="/panel/reports">Звіти</a>
+  <a href="/panel/import">Імпорт і експорт</a>
+  {{if eq .User.Role "admin"}}<a href="/panel/users">Користувачі</a>{{end}}
+</nav>
+{{end}}

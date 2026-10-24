@@ -1,0 +1,27 @@
+{{define "content"}}
+<h1 class="page-title">Користувачі</h1>
+<table class="data">
+  <thead><tr><th>Ім'я</th><th>Email</th><th>Роль</th></tr></thead>
+  <tbody>
+    {{range .Data.Users}}
+    <tr>
+      <td>{{.FullName}}</td>
+      <td>{{.Email}}</td>
+      <td>
+        <!-- 1. An inline form (class "inline-form") method="post" action="/panel/users/{{.ID}}/role" with hidden csrf_token ({{$.CSRFToken}}), a <select name="role" aria-label="Роль"> with three options admin "Адміністратор", librarian "Бібліотекар", reader "Читач", the current one selected with {{if eq .Role "admin"}} selected{{end}} (and the same for the other two), and <button type="submit" class="btn btn-secondary btn-small">Зберегти</button>. -->
+        <form method="post" action="/panel/users/{{.ID}}/role" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+          <select name="role" aria-label="Роль">
+            <option value="admin" {{if eq .Role "admin"}} selected{{end}}>Адміністратор</option>
+            <option value="librarian" {{if eq .Role "librarian"}} selected{{end}}>Бібліотекар</option>
+            <option value="reader" {{if eq .Role "reader"}} selected{{end}}>Читач</option>
+          </select>
+          <button type="submit" class="btn btn-secondary btn-small">Зберегти</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{template "pagination" .Data.Pager}}
+{{end}}

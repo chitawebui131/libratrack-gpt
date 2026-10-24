@@ -1,0 +1,43 @@
+{{define "content"}}
+<h1 class="page-title">Автори</h1>
+<form method="post" action="{{if .Data.EditID}}/panel/authors/{{.Data.EditID}}{{else}}/panel/authors{{end}}">
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+  <div class="form-group">
+    <label for="full_name">Повне ім'я</label>
+    <input id="full_name" name="full_name" type="text" value="{{.Data.FullName}}" required>
+    {{template "field_error" .Data.Errors.FullName}}
+  </div>
+  <div class="form-group">
+    <label for="bio">Біографія</label>
+    <textarea id="bio" name="bio" rows="3">{{.Data.Bio}}</textarea>
+    {{template "field_error" .Data.Errors.Bio}}
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{if .Data.EditID}}Зберегти{{else}}Додати{{end}}</button>
+    {{if .Data.EditID}}<a class="btn btn-secondary" href="/panel/authors">Скасувати</a>{{end}}
+  </div>
+</form>
+<div class="data">
+  <table>
+    <thead>
+      <tr>
+        <th>Повне ім'я</th>
+        <th>Дії</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Data.Authors}}
+      <tr>
+        <td>{{.FullName}}</td>
+        <td><a href="/panel/authors/{{.ID}}/edit">Редагувати</a>
+          <form class="inline-form" method="post" action="/panel/authors/{{.ID}}/delete">
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <button type="submit" class="btn btn-danger btn-small">Видалити</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

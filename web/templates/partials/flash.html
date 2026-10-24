@@ -1,0 +1,30 @@
+{{define "flash"}}{{if .Flash}}
+{{if eq .Flash "registered"}}<div class="flash flash-success">Реєстрація успішна. Ласкаво просимо!</div>
+{{else if eq .Flash "logged_out"}}<div class="flash flash-success">Ви вийшли з акаунта.</div>
+{{else if eq .Flash "book_created"}}<div class="flash flash-success">Книгу створено.</div>
+{{else if eq .Flash "book_updated"}}<div class="flash flash-success">Книгу оновлено.</div>
+{{else if eq .Flash "book_deleted"}}<div class="flash flash-success">Книгу видалено.</div>
+{{else if eq .Flash "author_saved"}}<div class="flash flash-success">Автора збережено.</div>
+{{else if eq .Flash "category_saved"}}<div class="flash flash-success">Категорію збережено.</div>
+{{else if eq .Flash "copy_added"}}<div class="flash flash-success">Примірник додано.</div>
+{{else if eq .Flash "copy_status_updated"}}<div class="flash flash-success">Статус примірника оновлено.</div>
+{{else if eq .Flash "copy_updated"}}<div class="flash flash-success">Примірник оновлено.</div>
+{{else if eq .Flash "copy_deleted"}}<div class="flash flash-success">Примірник видалено.</div>
+{{else if eq .Flash "loan_issued"}}<div class="flash flash-success">Книгу видано.</div>
+{{else if eq .Flash "loan_returned"}}<div class="flash flash-success">Повернення прийнято.{{if gt .FlashArg 0}} Штраф: {{.FlashArg}} грн.{{end}}</div>
+{{else if eq .Flash "role_updated"}}<div class="flash flash-success">Роль оновлено.</div>
+{{else if eq .Flash "book_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: у книги є історія видач.</div>
+{{else if eq .Flash "copy_status_blocked"}}<div class="flash flash-error" role="alert">Не можна змінити статус виданого примірника.</div>
+{{else if eq .Flash "copy_conflict"}}<div class="flash flash-error" role="alert">Такий інвентарний номер уже існує.</div>
+{{else if eq .Flash "copy_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: у примірника є історія видач.</div>
+{{else if eq .Flash "loan_error_not_available"}}<div class="flash flash-error" role="alert">Цей примірник недоступний для видачі.</div>
+{{else if eq .Flash "loan_error_reader_not_found"}}<div class="flash flash-error" role="alert">Читача з таким email не знайдено.</div>
+{{else if eq .Flash "loan_error_limit_reached"}}<div class="flash flash-error" role="alert">Читач досяг ліміту активних видач.</div>
+{{else if eq .Flash "role_self_change"}}<div class="flash flash-error" role="alert">Не можна змінювати власну роль.</div>
+{{else if eq .Flash "generic_error"}}<div class="flash flash-error" role="alert">Не вдалося виконати дію.</div>
+{{else if eq .Flash "author_deleted"}}<div class="flash flash-success">Автора видалено.</div>
+{{else if eq .Flash "category_deleted"}}<div class="flash flash-success">Категорію видалено.</div>
+{{else if eq .Flash "author_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: автор прив'язаний до книг.</div>
+{{else if eq .Flash "category_delete_blocked"}}<div class="flash flash-error" role="alert">Видалення неможливе: у категорії є книги.</div>
+{{end}}
+{{end}}{{end}}

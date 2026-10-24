@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: libratrack-db
+    environment:
+      POSTGRES_USER: libratrack
+      POSTGRES_PASSWORD: libratrack
+      POSTGRES_DB: libratrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - libratrack_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U libratrack -d libratrack"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: .
+    container_name: libratrack-api
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: 
+      - .env
+    environment:
+      DATABASE_URL: postgres://libratrack:libratrack@db:5432/libratrack?sslmode=disable
+      MIGRATIONS_PATH: /app/migrations
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  libratrack_pgdata:

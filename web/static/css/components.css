@@ -1,0 +1,84 @@
+/* 1. .btn: inline-block, padding 0.5rem 1rem, border-radius 6px, border 1px solid var(--border), background transparent, color var(--fg), cursor pointer, text-decoration none, font inherit. */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+}
+
+/* 2. .btn-primary: background var(--primary), color var(--primary-fg), border-color var(--primary). */
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-fg);
+  border-color: var(--primary);
+}
+
+/* 3. .btn-secondary: background var(--card-bg). */
+.btn-secondary {
+  background: var(--card-bg);
+}
+
+/* 4. .btn-danger: background var(--danger), color #fff, border-color var(--danger). */
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+/* 5. .btn-small: padding 0.25rem 0.6rem, font-size 0.85rem. */
+.btn-small {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* 6. .badge: inline-block, padding 0.1rem 0.5rem, border-radius 999px, font-size 0.85rem, border 1px solid var(--border). */
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+
+/* 7. .badge-available: green tint. .badge-borrowed: blue tint. .badge-lost: grey tint. .badge-repair: orange tint. .badge-overdue: red tint. (Use background-color and color; keep readable in dark mode.) */
+.badge-available {
+  background-color: #d4edda;
+  color: #155724;
+}
+.badge-borrowed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+.badge-lost {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+.badge-repair {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.badge-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 8. .flash: padding 0.75rem 1rem, border-radius 6px, margin-bottom 1rem, border 1px solid var(--border). */
+.flash {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+
+/* 9. .flash-success: border-color var(--success). .flash-error: border-color var(--danger). */
+.flash-success {
+  border-color: var(--success);
+}
+.flash-error {
+  border-color: var(--danger);
+}

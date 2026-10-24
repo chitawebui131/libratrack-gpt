@@ -1,0 +1,39 @@
+{{define "content"}}
+<h1 class="page-title">Звіти</h1>
+<section>
+  <h2>Найпопулярніші книги</h2>
+  {{if .Data.Top}}
+  <table class="data">
+    <thead><tr><th>№</th><th>Книга</th><th>Видач</th></tr></thead>
+    <tbody>
+      {{range $i, $b := .Data.Top}}
+      <tr>
+        <td>{{add $i 1}}</td>
+        <td><a href="/books/{{$b.BookID}}">{{$b.Title}}</a></td>
+        <td>{{$b.LoanCount}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}<p class="muted">Даних про видачі ще немає.</p>{{end}}
+</section>
+<section>
+  <h2>Читачі з простроченням</h2>
+  {{if .Data.Overdue}}
+  <table class="data">
+    <thead><tr><th>Читач</th><th>Книга</th><th>Повернути до</th><th>Днів прострочення</th><th>Штраф</th></tr></thead>
+    <tbody>
+      {{range .Data.Overdue}}
+      <tr>
+        <td>{{.Loan.UserFullName}}<br><span class="muted">{{.Loan.UserEmail}}</span></td>
+        <td><a href="/books/{{.Loan.BookID}}">{{.Loan.BookTitle}}</a></td>
+        <td>{{date .Loan.DueAt}}</td>
+        <td>{{.Days}}</td>
+        <td>{{.Fine}} грн</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}<p class="muted">Прострочених видач немає.</p>{{end}}
+</section>
+{{end}}

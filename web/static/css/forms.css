@@ -1,0 +1,79 @@
+/* 1. .form-group: margin-bottom 1rem. .form-group label: display block, margin-bottom 0.25rem, font-weight 600. */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+/* 2. input, select, textarea: width 100%, max-width 480px, padding 0.5rem, border 1px solid var(--border), border-radius 6px, background var(--card-bg), color var(--fg), font inherit. */
+input,
+select,
+textarea {
+  width: 100%;
+  max-width: 480px;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+/* 3. input[type="checkbox"]: width auto. */
+input[type="checkbox"] {
+  width: auto;
+}
+
+/* 4. .form-actions: display flex, gap 0.75rem, margin-top 1rem. */
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* 5. .field-error: display block, color var(--danger), font-size 0.9rem, margin-top 0.25rem. */
+.field-error {
+  display: block;
+  color: var(--danger);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* 6. .inline-form: display inline-flex, gap 0.5rem, align-items center, margin: 0. .inline-form select, .inline-form input: width auto. */
+.inline-form {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+}
+
+.inline-form select,
+.inline-form input {
+  width: auto;
+}
+
+/* 7. table.data: width 100%, border-collapse collapse. table.data th, table.data td: padding 0.5rem, border-bottom 1px solid var(--border), text-align left, vertical-align top. */
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.data th,
+table.data td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* 8. .table-wrap is NOT allowed; instead make table.data display block with overflow-x auto at max-width 700px (@media). */
+@media (max-width: 700px) {
+  table.data {
+    display: block;
+    overflow-x: auto;
+  }
+}

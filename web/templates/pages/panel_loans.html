@@ -1,0 +1,37 @@
+{{define "content"}}
+<h1 class="page-title">Активні видачі</h1>
+{{if .Data.Rows}}
+<table class="data">
+  <thead><tr><th>Книга</th><th>Інв. номер</th><th>Читач</th><th>Видано</th><th>Повернути до</th><th>Статус</th><th>Штраф</th><th></th></tr></thead>
+  <tbody>
+    {{range .Data.Rows}}
+    <tr>
+      <!-- 1. <td><a href="/books/{{.Loan.BookID}}">{{.Loan.BookTitle}}</a></td> and <td>{{.Loan.InventoryNo}}</td>. -->
+      <td><a href="/books/{{.Loan.BookID}}">{{.Loan.BookTitle}}</a></td>
+      <td>{{.Loan.InventoryNo}}</td>
+
+      <!-- 2. <td>{{.Loan.UserFullName}}<br><span class="muted">{{.Loan.UserEmail}}</span></td>. -->
+      <td>{{.Loan.UserFullName}}<br><span class="muted">{{.Loan.UserEmail}}</span></td>
+
+      <!-- 3. <td>{{date .Loan.BorrowedAt}}</td> and <td>{{date .Loan.DueAt}}</td>. -->
+      <td>{{date .Loan.BorrowedAt}}</td>
+      <td>{{date .Loan.DueAt}}</td>
+
+      <!-- 4. Status <td>: when .Overdue <span class="badge badge-overdue">Прострочено</span>, otherwise <span class="badge badge-borrowed">На руках</span>. Fine <td>: {{if gt .Fine 0}}{{.Fine}} грн{{end}}. -->
+      <td>{{if .Overdue}}<span class="badge badge-overdue">Прострочено</span>{{else}}<span class="badge badge-borrowed">На руках</span>{{end}}</td>
+      <td>{{if gt .Fine 0}}{{.Fine}} грн{{end}}</td>
+      <td>
+        <form method="post" action="/panel/loans/{{.Loan.LoanID}}/return" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+          <button type="submit" class="btn btn-primary btn-small">Прийняти повернення</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="muted">Активних видач немає.</p>
+{{end}}
+{{template "pagination" .Data.Pager}}
+{{end}}

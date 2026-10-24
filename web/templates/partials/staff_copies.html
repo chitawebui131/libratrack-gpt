@@ -1,0 +1,81 @@
+{{define "staff_copies"}}
+<section>
+  <h2>Примірники</h2>
+  <p><a class="btn btn-secondary btn-small" href="/panel/books/{{.Data.Book.ID}}/edit">Редагувати</a></p>
+  {{if .Data.Copies}}
+  <table class="data">
+    <thead><tr><th>Інвентарний номер</th><th>Відділ</th><th>Статус</th><th>Дії</th></tr></thead>
+    <tbody>
+      {{range .Data.Copies}}
+      <tr>
+        <td>{{.InventoryNo}}</td>
+        <td>{{.Department}}</td>
+        <td><span class="badge badge-{{statusClass .Status}}">{{.Status}}</span></td>
+        <td>
+          {{if ne (printf "%v" .Status) "borrowed"}}
+          <form class="inline-form" method="post" action="/panel/copies/{{.ID}}/status">
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <input type="hidden" name="book_id" value="{{$.Data.Book.ID}}">
+            <select name="status" aria-label="Статус">
+              <option value="available" {{if eq .Status "available"}}selected{{end}}>Доступний</option>
+              <option value="lost" {{if eq .Status "lost"}}selected{{end}}>Втрачений</option>
+              <option value="under_repair" {{if eq .Status "under_repair"}}selected{{end}}>На ремонті</option>
+            </select>
+            <button type="submit" class="btn btn-secondary btn-small">Зберегти</button>
+          </form>
+          <form class="inline-form" method="post" action="/panel/copies/{{.ID}}">
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <input type="hidden" name="book_id" value="{{$.Data.Book.ID}}">
+            <input name="inventory_no" type="text" value="{{.InventoryNo}}" required aria-label="Інвентарний номер">
+            <input name="department" type="text" value="{{.Department}}" aria-label="Відділ">
+            <button type="submit" class="btn btn-secondary btn-small">Змінити</button>
+          </form>
+          <form class="inline-form" method="post" action="/panel/copies/{{.ID}}/delete">
+            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+            <input type="hidden" name="book_id" value="{{$.Data.Book.ID}}">
+            <button type="submit" class="btn btn-danger btn-small">Видалити</button>
+          </form>
+          {{end}}
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}<p class="muted">Примірників ще немає.</p>{{end}}
+
+  <h3>Додати примірник</h3>
+  <form method="post" action="/panel/books/{{.Data.Book.ID}}/copies">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <div class="form-group">
+      <label for="inventory_no">Інвентарний номер</label>
+      <input id="inventory_no" name="inventory_no" type="text" required>
+    </div>
+    <div class="form-group">
+      <label for="department">Відділ</label>
+      <input id="department" name="department" type="text">
+    </div>
+    <button type="submit" class="btn btn-primary">Додати</button>
+  </form>
+
+  {{if .Data.AvailableCopies}}
+  <h3>Видати книгу</h3>
+  <form method="post" action="/panel/loans">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="book_id" value="{{.Data.Book.ID}}">
+    <div class="form-group">
+      <label for="copy_id">Примірник</label>
+      <select id="copy_id" name="copy_id">
+        {{range .Data.AvailableCopies}}
+        <option value="{{.ID}}">{{.InventoryNo}}</option>
+        {{end}}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="reader_email">Email читача</label>
+      <input id="reader_email" name="reader_email" type="email" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Видати</button>
+  </form>
+  {{end}}
+</section>
+{{end}}

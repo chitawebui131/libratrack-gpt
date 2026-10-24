@@ -1,0 +1,58 @@
+{{define "content"}}
+<h1 class="page-title">Каталог</h1>
+<form method="get" action="/catalog" class="filters">
+  <!-- 1. A div.form-group with <label for="q">Пошук</label> and <input id="q" name="q" type="search" value="{{.Data.Query}}">. -->
+  <div class="form-group">
+    <label for="q">Пошук</label>
+    <input id="q" name="q" type="search" value="{{.Data.Query}}">
+  </div>
+  <!-- 2. A div.form-group with <label for="category_id">Категорія</label> and a <select id="category_id" name="category_id"> -->
+  <div class="form-group">
+    <label for="category_id">Категорія</label>
+    <select id="category_id" name="category_id">
+      <option value="">Усі</option>
+      {{range .Data.Categories}}
+      <option value="{{.ID}}" {{if $.Data.CategoryID}}{{if eq .ID $.Data.CategoryID}}selected{{end}}{{end}}>{{.Name}}</option>
+      {{end}}
+    </select>
+  </div>
+  <!-- 3. The same for authors -->
+  <div class="form-group">
+    <label for="author_id">Автор</label>
+    <select id="author_id" name="author_id">
+      <option value="">Усі</option>
+      {{range .Data.Authors}}
+      <option value="{{.ID}}" {{if $.Data.AuthorID}}{{if eq .ID $.Data.AuthorID}}selected{{end}}{{end}}>{{.FullName}}</option>
+      {{end}}
+    </select>
+  </div>
+  <!-- 4. A div.form-group for available checkbox -->
+  <div class="form-group">
+    <label><input type="checkbox" name="available" value="1"{{if .Data.OnlyAvailable}} checked{{end}}> Лише доступні</label>
+  </div>
+  <button type="submit" class="btn btn-primary">Знайти</button>
+</form>
+{{if .Data.Cards}}
+<div class="grid">
+  {{range .Data.Cards}}
+  <article class="card">
+    <!-- 5. An <h2> with a link -->
+    <h2><a href="/books/{{.Book.ID}}">{{.Book.Title}}</a></h2>
+    <!-- 6. A <p class="muted"> with the authors -->
+    <p class="muted">{{range $i, $a := .Book.Authors}}{{if $i}}, {{end}}{{$a.FullName}}{{end}}</p>
+    <!-- 7. A <p> with the category name -->
+    <p>{{if .Book.Category}}{{.Book.Category.Name}}{{end}}{{if .Book.PublishedYear}}, {{.Book.PublishedYear}}{{end}}</p>
+    <!-- 8. Available badges -->
+    {{if gt .Available 0}}
+    <span class="badge badge-available">Доступно {{.Available}} з {{.Total}}</span>
+    {{else}}
+    <span class="badge badge-borrowed">Немає в наявності</span>
+    {{end}}
+  </article>
+  {{end}}
+</div>
+{{else}}
+<p class="muted">Нічого не знайдено. Спробуйте змінити фільтри.</p>
+{{end}}
+{{template "pagination" .Data.Pager}}
+{{end}}
