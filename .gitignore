@@ -18,6 +18,9 @@ all-results/
 
 # compiled binary in the repo root (anchored so cmd/api/ is not ignored)
 /api
+/go/ 
+/runs/ 
+/bin/
 # ##########################################
 # 1. Бінарні файли та компіляція
 # ##########################################
