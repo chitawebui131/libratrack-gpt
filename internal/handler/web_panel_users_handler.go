@@ -12,14 +12,22 @@ import (
 	"libratrack/internal/repository"
 )
 
+// UserAdmin is implemented by *service.AuthService.
+type UserAdmin interface {
+	CreateUser(email, password, fullName, role string) (*model.User, error)
+	UpdateProfile(id uint, email, fullName string) error
+	ResetPassword(id uint, password string) error
+}
+
 type WebPanelUsersHandler struct {
 	users   repository.UserRepository
 	refresh repository.RefreshTokenRepository
+	auth    UserAdmin
 	render  *Renderer
 }
 
-func NewWebPanelUsersHandler(users repository.UserRepository, refresh repository.RefreshTokenRepository, render *Renderer) *WebPanelUsersHandler {
-	return &WebPanelUsersHandler{users: users, refresh: refresh, render: render}
+func NewWebPanelUsersHandler(users repository.UserRepository, refresh repository.RefreshTokenRepository, auth UserAdmin, render *Renderer) *WebPanelUsersHandler {
+	return &WebPanelUsersHandler{users: users, refresh: refresh, auth: auth, render: render}
 }
 
 type roleForm struct {
