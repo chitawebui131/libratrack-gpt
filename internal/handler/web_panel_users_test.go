@@ -69,7 +69,12 @@ func (f *fakeUsersRepo) SetDisabled(id uint, disabled bool) error {
 	return nil
 }
 
-type fakeAdmin struct{ repository.AdminRepository }
+type fakeAdmin struct{}
+
+func (fakeAdmin) Get() error {
+	// This method is not used by the tests
+	return nil
+}
 
 func usersTestRouter(t *testing.T) *gin.Engine {
 	render, err := NewRenderer(web.FS, nil)
