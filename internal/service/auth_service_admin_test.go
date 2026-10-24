@@ -104,12 +104,10 @@ func TestCreateUserEmailTaken(t *testing.T) {
 	})
 	bcryptCost = bcrypt.MinCost
 
-
 	fake := &fakeUserRepo{
 		byEmail:   make(map[string]*model.User),
 		createErr: repository.ErrConflict,
 	}
-
 
 	tokens, err := NewTokenManager(strings.Repeat("k", 32), time.Hour)
 	if err != nil {
@@ -118,13 +116,11 @@ func TestCreateUserEmailTaken(t *testing.T) {
 
 	authService := NewAuthService(fake, tokens)
 
-
 	_, err = authService.CreateUser("test@example.com", "password123", "Test User", "admin")
 	if !errors.Is(err, ErrEmailTaken) {
 		t.Errorf("Expected ErrEmailTaken when email is taken, got %v", err)
 	}
 }
-
 
 func TestLoginDisabledUser(t *testing.T) {
 	originalBcryptCost := bcryptCost
