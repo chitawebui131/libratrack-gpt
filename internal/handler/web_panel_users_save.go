@@ -36,7 +36,7 @@ func (h *WebPanelUsersHandler) CreateUser(c *gin.Context) {
 		return
 	}
 	// 4. RedirectWithFlash(c, "/panel/users", "user_created", 0).
-	h.redirectWithFlash(c, "/panel/users", "user_created", 0)
+	h.RedirectWithFlash(c, "/panel/users", "user_created", 0)
 }
 
 // UpdateUser handles POST /panel/users/:id. An empty password means "do not change it".
@@ -85,5 +85,5 @@ func (h *WebPanelUsersHandler) UpdateUser(c *gin.Context) {
 		}
 	}
 	// 5. RedirectWithFlash(c, "/panel/users", "user_updated", 0).
-	h.redirectWithFlash(c, "/panel/users", "user_updated", 0)
+	h.RedirectWithFlash(c, "/panel/users", "user_updated", 0)
 }
