@@ -1,0 +1,1 @@
+<option value="admin" {{if eq .Data.Role "admin"}}selected{{end}}>Адміністратор</option>
