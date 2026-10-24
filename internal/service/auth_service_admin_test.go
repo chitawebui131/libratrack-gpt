@@ -97,7 +97,6 @@ func TestCreateUserValidates(t *testing.T) {
 }
 
 func TestCreateUserEmailTaken(t *testing.T) {
-
 	originalBcryptCost := bcryptCost
 	t.Cleanup(func() {
 		bcryptCost = originalBcryptCost
