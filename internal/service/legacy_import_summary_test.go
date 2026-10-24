@@ -63,8 +63,7 @@ func TestSummarizeGroupsAndSorts(t *testing.T) {
 }
 
 func TestTrimDetailsKeepsErrorsFirst(t *testing.T) {
-	
-	
+
 	makeReport := func() *model.ImportReport {
 		return &model.ImportReport{
 			Details: []model.ImportRowResult{
@@ -85,7 +84,6 @@ func TestTrimDetailsKeepsErrorsFirst(t *testing.T) {
 		}
 	}
 
-	
 	rep := makeReport()
 	TrimDetails(rep, 5)
 
@@ -113,10 +111,9 @@ func TestTrimDetailsKeepsErrorsFirst(t *testing.T) {
 		}
 	}
 
-	
 	repZero := makeReport()
 	TrimDetails(repZero, 0)
-	
+
 	if repZero.DetailsTotal != 13 {
 		t.Errorf("expected DetailsTotal to be 13 after limit 0, got %d", repZero.DetailsTotal)
 	}
