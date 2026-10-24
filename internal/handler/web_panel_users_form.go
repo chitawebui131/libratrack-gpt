@@ -60,7 +60,7 @@ func (h *WebPanelUsersHandler) EditUserPage(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		h.render.ServerError(c, err)
+		h.render.ServerError(c)
 		return
 	}
 	h.render.Render(c, http.StatusOK, "panel_user_form", "user_edit", userFormPage{ID: u.ID, FullName: u.FullName, Email: u.Email, Role: u.Role, Errors: map[string]string{}})
