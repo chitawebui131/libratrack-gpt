@@ -47,43 +47,36 @@ func (usersTestRefresher) Refresh(token string) (*model.AuthResponse, error) {
 	return nil, repository.ErrNotFound
 }
 
-type fakeUsersRepo struct {
-	repository.UserRepository
-	deleteCalls      []uint
-	setDisabledCalls []struct {
-		id       uint
-		disabled bool
-	}
-}
 func (usersTestRefresher) RevokeAllForUser(userID uint) error {
 	return nil
 }
+
+type fakeDisableCall struct {
+	id       uint
+	disabled bool
+}
+
+// fakeUsersRepo records the calls. It must be shared by pointer between the router and the test.
+type fakeUsersRepo struct {
+	repository.UserRepository
+	deleteCalls      []uint
+	setDisabledCalls []fakeDisableCall
+}
+
 func (f *fakeUsersRepo) Delete(id uint) error {
 	f.deleteCalls = append(f.deleteCalls, id)
 	return nil
 }
 
 func (f *fakeUsersRepo) SetDisabled(id uint, disabled bool) error {
-	f.setDisabledCalls = append(f.setDisabledCalls, struct {
-		id       uint
-		disabled bool
-	}{id: id, disabled: disabled})
+	f.setDisabledCalls = append(f.setDisabledCalls, fakeDisableCall{id: id, disabled: disabled})
 	return nil
 }
 
 type fakeAdmin struct{}
 
-func (fakeAdmin) Get() error {
-	// This method is not used by the tests
-	return nil
-}
-
 func (fakeAdmin) CreateUser(email, password, fullName, role string) (*model.User, error) {
-	return &model.User{
-		Email:    email,
-		FullName: fullName,
-		Role:     role,
-	}, nil
+	return &model.User{Email: email, FullName: fullName, Role: role}, nil
 }
 
 func (fakeAdmin) ResetPassword(userID uint, newPassword string) error {
@@ -94,7 +87,9 @@ func (fakeAdmin) UpdateProfile(userID uint, email, fullName string) error {
 	return nil
 }
 
-func usersTestRouter(t *testing.T) *gin.Engine {
+// usersTestRouter returns the router and the ONE fake repository used by all handlers.
+func usersTestRouter(t *testing.T) (*gin.Engine, *fakeUsersRepo) {
+	t.Helper()
 	render, err := NewRenderer(web.FS, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -102,132 +97,117 @@ func usersTestRouter(t *testing.T) *gin.Engine {
 	cookies := middleware.CookieConfig{}
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	web := r.Group("", middleware.SecurityHeadersMiddleware(), middleware.CSRFMiddleware(cookies, render.Forbidden), middleware.WebAuthMiddleware(usersTestVerifier{}, usersTestRefresher{}, usersTestUsers{}, cookies))
-	admin := web.Group("", middleware.RequireWebRoles(render.Forbidden, model.RoleAdmin))
-	admin.GET("/panel/new-user", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).NewUser)
-	admin.POST("/panel/users/:id/delete", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).DeleteUser)
-	admin.POST("/panel/users/:id/disable", NewWebPanelUsersHandler(&fakeUsersRepo{}, usersTestRefresher{}, fakeAdmin{}, render).SetDisabled)
-	return r
+	repo := &fakeUsersRepo{}
+	h := NewWebPanelUsersHandler(repo, usersTestRefresher{}, fakeAdmin{}, render)
+
+	g := r.Group("", middleware.SecurityHeadersMiddleware(), middleware.CSRFMiddleware(cookies, render.Forbidden), middleware.WebAuthMiddleware(usersTestVerifier{}, usersTestRefresher{}, usersTestUsers{}, cookies))
+	admin := g.Group("", middleware.RequireWebRoles(render.Forbidden, model.RoleAdmin))
+	admin.GET("/panel/new-user", h.NewUserPage)
+	admin.POST("/panel/users/:id/delete", h.DeleteUser)
+	admin.POST("/panel/users/:id/disable", h.SetDisabled)
+	return r, repo
+}
+
+func usersTestCSRF(t *testing.T, r *gin.Engine) string {
+	t.Helper()
+	w := do(r, "GET", "/panel/new-user", []string{"access_token=admin-token"}, nil)
+	for _, c := range w.Result().Cookies() {
+		if c.Name == "csrf_token" {
+			return c.Value
+		}
+	}
+	t.Fatal("CSRF cookie not found")
+	return ""
+}
+
+func usersTestFlash(w interface{ Result() *http.Response }) string {
+	for _, c := range w.Result().Cookies() {
+		if c.Name == "flash" {
+			return c.Value
+		}
+	}
+	return ""
 }
 
 func TestNewUserPageIsAdminOnly(t *testing.T) {
-	r := usersTestRouter(t)
+	r, _ := usersTestRouter(t)
 
-	// Test without cookie
 	w := do(r, "GET", "/panel/new-user", []string{}, nil)
 	if w.Code != http.StatusSeeOther {
-		t.Errorf("Expected status %d, got %d", http.StatusSeeOther, w.Code)
+		t.Errorf("guest: expected status %d, got %d", http.StatusSeeOther, w.Code)
 	}
 
-	// Test with librarian cookie
 	w = do(r, "GET", "/panel/new-user", []string{"access_token=librarian-token"}, nil)
 	if w.Code != http.StatusForbidden {
-		t.Errorf("Expected status %d, got %d", http.StatusForbidden, w.Code)
+		t.Errorf("librarian: expected status %d, got %d", http.StatusForbidden, w.Code)
 	}
 
-	// Test with admin cookie
 	w = do(r, "GET", "/panel/new-user", []string{"access_token=admin-token"}, nil)
 	if w.Code != http.StatusOK {
-		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
+		t.Fatalf("admin: expected status %d, got %d", http.StatusOK, w.Code)
 	}
 	body := w.Body.String()
 	if !strings.Contains(body, `name="password"`) {
-		t.Errorf("Expected body to contain 'name=\"password\"', got %s", body)
+		t.Errorf("expected the form to contain name=\"password\"")
 	}
 	if !strings.Contains(body, `name="role"`) {
-		t.Errorf("Expected body to contain 'name=\"role\"', got %s", body)
+		t.Errorf("expected the form to contain name=\"role\"")
 	}
 }
 
 func TestAdminCannotDeleteOrDisableSelf(t *testing.T) {
-	r := usersTestRouter(t)
-	fakeRepo := &fakeUsersRepo{}
-	//handler := NewWebPanelUsersHandler(fakeRepo, usersTestRefresher{}, fakeAdmin{}, nil)
+	r, repo := usersTestRouter(t)
+	csrf := usersTestCSRF(t, r)
+	cookies := []string{"access_token=admin-token", "csrf_token=" + csrf}
 
-	// Test delete self
-	csrf := csrfCookie(t, r)
-	form := url.Values{"csrf_token": {csrf}}
-	w := do(r, "POST", "/panel/users/3/delete", []string{"access_token=admin-token", "csrf_token=" + csrf}, form)
+	// Delete self (admin is user 3).
+	w := do(r, "POST", "/panel/users/3/delete", cookies, url.Values{"csrf_token": {csrf}})
 	if w.Code != http.StatusSeeOther {
-		t.Errorf("Expected status %d, got %d", http.StatusSeeOther, w.Code)
+		t.Errorf("delete self: expected status %d, got %d", http.StatusSeeOther, w.Code)
 	}
-	location := w.Result().Header.Get("Location")
-	if location != "/panel/users" {
-		t.Errorf("Expected redirect to '/panel/users', got %s", location)
+	if loc := w.Header().Get("Location"); loc != "/panel/users" {
+		t.Errorf("delete self: expected redirect to /panel/users, got %s", loc)
 	}
-	flash := ""
-	for _, c := range w.Result().Cookies() {
-		if c.Name == "flash" {
-			flash = c.Value
-			break
-		}
-	}
-	if flash != "user_self_action" {
-		t.Errorf("Expected flash cookie 'user_self_action', got %s", flash)
-	}
-	if len(fakeRepo.deleteCalls) != 0 {
-		t.Errorf("Expected no delete calls, got %d", len(fakeRepo.deleteCalls))
+	if f := usersTestFlash(w); f != "user_self_action" {
+		t.Errorf("delete self: expected flash user_self_action, got %q", f)
 	}
 
-	// Test disable self
-	w = do(r, "POST", "/panel/users/3/disable", []string{"access_token=admin-token", "csrf_token=" + csrf}, form)
+	// Disable self.
+	w = do(r, "POST", "/panel/users/3/disable", cookies, url.Values{"csrf_token": {csrf}, "disabled": {"1"}})
 	if w.Code != http.StatusSeeOther {
-		t.Errorf("Expected status %d, got %d", http.StatusSeeOther, w.Code)
+		t.Errorf("disable self: expected status %d, got %d", http.StatusSeeOther, w.Code)
 	}
-	location = w.Result().Header.Get("Location")
-	if location != "/panel/users" {
-		t.Errorf("Expected redirect to '/panel/users', got %s", location)
+	if loc := w.Header().Get("Location"); loc != "/panel/users" {
+		t.Errorf("disable self: expected redirect to /panel/users, got %s", loc)
 	}
-	flash = ""
-	for _, c := range w.Result().Cookies() {
-		if c.Name == "flash" {
-			flash = c.Value
-			break
-		}
+	if f := usersTestFlash(w); f != "user_self_action" {
+		t.Errorf("disable self: expected flash user_self_action, got %q", f)
 	}
-	if flash != "user_self_action" {
-		t.Errorf("Expected flash cookie 'user_self_action', got %s", flash)
+
+	if len(repo.deleteCalls) != 0 {
+		t.Errorf("expected no delete calls, got %v", repo.deleteCalls)
 	}
-	if len(fakeRepo.setDisabledCalls) != 0 {
-		t.Errorf("Expected no set disabled calls, got %d", len(fakeRepo.setDisabledCalls))
+	if len(repo.setDisabledCalls) != 0 {
+		t.Errorf("expected no set-disabled calls, got %v", repo.setDisabledCalls)
 	}
 }
 
 func TestAdminDeletesAnotherUser(t *testing.T) {
-	r := usersTestRouter(t)
-	fakeRepo := &fakeUsersRepo{}
+	r, repo := usersTestRouter(t)
+	csrf := usersTestCSRF(t, r)
+	cookies := []string{"access_token=admin-token", "csrf_token=" + csrf}
 
-	// Test delete another user
-	csrf := csrfCookie(t, r)
-	form := url.Values{"csrf_token": {csrf}}
-	w := do(r, "POST", "/panel/users/7/delete", []string{"access_token=admin-token", "csrf_token=" + csrf}, form)
+	w := do(r, "POST", "/panel/users/7/delete", cookies, url.Values{"csrf_token": {csrf}})
 	if w.Code != http.StatusSeeOther {
-		t.Errorf("Expected status %d, got %d", http.StatusSeeOther, w.Code)
+		t.Errorf("expected status %d, got %d", http.StatusSeeOther, w.Code)
 	}
-	location := w.Result().Header.Get("Location")
-	if location != "/panel/users" {
-		t.Errorf("Expected redirect to '/panel/users', got %s", location)
+	if loc := w.Header().Get("Location"); loc != "/panel/users" {
+		t.Errorf("expected redirect to /panel/users, got %s", loc)
 	}
-	flash := ""
-	for _, c := range w.Result().Cookies() {
-		if c.Name == "flash" {
-			flash = c.Value
-			break
-		}
+	if f := usersTestFlash(w); f != "user_deleted" {
+		t.Errorf("expected flash user_deleted, got %q", f)
 	}
-	if flash != "user_deleted" {
-		t.Errorf("Expected flash cookie 'user_deleted', got %s", flash)
+	if len(repo.deleteCalls) != 1 || repo.deleteCalls[0] != 7 {
+		t.Fatalf("expected one delete call with id 7, got %v", repo.deleteCalls)
 	}
-	if len(fakeRepo.deleteCalls) != 1 {
-		t.Errorf("Expected one delete call, got %d", len(fakeRepo.deleteCalls))
-	}
-	if fakeRepo.deleteCalls[0] != 7 {
-		t.Errorf("Expected delete call with id 7, got %d", fakeRepo.deleteCalls[0])
-	}
-}
-
-func (h *WebPanelUsersHandler) NewUser(c *gin.Context) {
-	
-	//c.Status(http.StatusOK)
- h.render.Render(c, http.StatusOK, "panel_user_new", "user_new", nil)
 }
