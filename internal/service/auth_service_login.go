@@ -28,7 +28,11 @@ func (s *AuthService) Login(email, password string) (*model.AuthResponse, error)
 	if !CheckPassword(user.PasswordHash, password) {
 		return nil, ErrInvalidCredentials
 	}
-	// 5. token, _, err := s.tokens.Issue(user.ID, user.Role). If err != nil, return nil, err.
+	// 5. If user.Disabled, return nil, ErrAccountDisabled.
+	if user.Disabled {
+		return nil, ErrAccountDisabled
+	}
+	// 6. token, _, err := s.tokens.Issue(user.ID, user.Role). If err != nil, return nil, err.
 	claims := &Claims{
 		Role: user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,7 +48,7 @@ func (s *AuthService) Login(email, password string) (*model.AuthResponse, error)
 	if err != nil {
 		return nil, err
 	}
-	// 6. Return &model.AuthResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: int(s.tokens.TTL().Seconds()), User: *user}, nil.
+	// 7. Return &model.AuthResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: int(s.tokens.TTL().Seconds()), User: *user}, nil.
 	return &model.AuthResponse{
 		AccessToken: token,
 		TokenType:   "Bearer",

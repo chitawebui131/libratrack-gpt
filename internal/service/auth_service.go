@@ -11,6 +11,7 @@ import (
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrEmailTaken         = errors.New("email already registered")
+	ErrAccountDisabled    = errors.New("account is disabled")
 )
 
 type AuthService struct {
