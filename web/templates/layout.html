@@ -4,14 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{template "page_title" .}} - LibraTrack</title>
+  
+  <!-- Favicon Configuration -->
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <!-- Alternative PNG version (uncomment if needed): -->
+  <!-- <link rel="icon" type="image/png" href="/static/images/favicon.png"> -->
+
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/layout.css">
   <link rel="stylesheet" href="/static/css/components.css">
   <link rel="stylesheet" href="/static/css/forms.css">
+
+  <!-- Local HTMX Library (Fixes CSP script-src 'self' error) -->
+  <script src="/static/js/htmx.min.js"></script>
 </head>
 <body>
   <header class="navbar">
-    <a class="navbar-brand" href="/catalog">LibraTrack</a>
+    <!-- Brand layout with CSS classes instead of inline styles (Fixes CSP style-src error) -->
+    <a class="navbar-brand navbar-brand-flex" href="/catalog">
+      <img src="/static/images/logo_2.png" alt="LibraTrack Logo" class="navbar-logo">
+      <span>LibraTrack</span>
+    </a>
+    
     <nav class="navbar-links">
       <a href="/catalog">Каталог</a>
       {{if .User}}
